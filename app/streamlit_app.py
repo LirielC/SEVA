@@ -53,14 +53,13 @@ with st.sidebar:
         )
         methods = [("agent", "AutoResearcher (Agent)"), ("optuna", "Optuna (TPE)"), ("random", "Random Search"), ("grid", "Grid Search")]
         total_steps = len(methods) * int(budget_input)
-        completed = 0
+        completed = [0]
 
         for m_code, m_label in methods:
             def _on_step(rec, label=m_label):
-                nonlocal completed
-                completed += 1
+                completed[0] += 1
                 progress_bar.progress(
-                    min(1.0, completed / total_steps),
+                    min(1.0, completed[0] / total_steps),
                     text=f"{label} — Trial {rec.trial_index + 1}/{budget_input} (Best Val F1: {rec.best_val_macro_f1_so_far:.4f})",
                 )
 
@@ -197,29 +196,9 @@ with tab_notebook:
 with tab_configs:
     st.subheader("Selected Optimal Pipelines Across Strategies")
     for r in results:
-        if "AutoResearcher" in r.strategy_name:
+        if "SEVA" in r.strategy_name or "Agent" in r.strategy_name:
             st.markdown(
                 f"### {r.dataset_name} — {r.strategy_name} "
-                f"(Holdout Macro-F1: `{r.holdout_test_macro_f1:.4f}` | CV Macro-F1: `{r.best_val_macro_f1:.4f}`)"
-            )
-            st.json(r.best_config.model_dump())
-                        f"**🛠️ Modo:** `{t.agent_decision.exploration_mode}` | "
-                        f"**Alterações:** `{', '.join(t.agent_decision.changed_components)}`"
-                    )
-                col_a, col_b = st.columns(2)
-                with col_a:
-                    st.markdown("**Métricas por Classe (Validação 5-Fold):**")
-                    st.json(t.diagnostics.per_class_f1)
-                with col_b:
-                    st.markdown("**Configuração Testada (`PipelineConfig`):**")
-                    st.json(t.config.model_dump())
-
-with tab_configs:
-    st.subheader("Configurações Vencedoras por Estratégia e Dataset")
-    for r in results:
-        if "AutoResearcher" in r.strategy_name:
-            st.markdown(
-                f"### 🏆 `{r.dataset_name}` — {r.strategy_name} "
                 f"(Holdout Macro-F1: `{r.holdout_test_macro_f1:.4f}` | CV Macro-F1: `{r.best_val_macro_f1:.4f}`)"
             )
             st.json(r.best_config.model_dump())
