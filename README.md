@@ -105,24 +105,51 @@ The system was evaluated across three OpenML tabular datasets with distinct stru
 
 ---
 
-## 5. Evaluation Metrics & Methodological Definitions
+## 5. Evaluation Methodology, Metrics & Rigorous Protocols
 
-### Metric Specifications
-- **Validation Macro-F1 (`Best Val Macro-F1`):** In each trial $t$, 5-Fold Stratified Cross-Validation is executed on the 80% Development partition. The validation score of trial $t$ is the arithmetic mean of the Macro-F1 scores across the 5 validation folds:
-  $$\text{val\_macro\_f1}_t = \frac{1}{5} \sum_{k=1}^5 \text{Macro-F1}_{k, t}$$
-  The `Best Val Macro-F1` reported in the benchmark table represents the highest mean 5-fold CV score achieved across all trials in that search run: $\max_{t} (\text{val\_macro\_f1}_t)$.
-- **Locked Holdout Test Macro-F1:** Evaluated exactly once on the untouched 20% holdout test partition using the single winning pipeline identified by validation cross-validation, retrained on the full 80% Development partition.
-- **AUC Convergence (Normalized Discrete Integral):** Quantifies early sample efficiency and cumulative regret across the search trajectory. Calculated as the normalized average of the cumulative best validation score across all $T$ budget steps:
+### 5.1 Scientific Scope & Generalizability Disclaimer
+With an evaluation budget of only six trials ($T=6$) per strategy across three datasets on a single reference seed (`seed=42`), the empirical findings presented in Section 4 represent **promising preliminary evidence** of diagnostic search efficiency rather than a definitive demonstration of universally generalizable superiority. A 6-trial budget illustrates early sample efficiency, but broader benchmarks with higher budgets (e.g., 20–50 trials) and multiple random seeds are essential for comprehensive statistical validation.
+
+### 5.2 Definition of Search Trials
+Each optimization strategy executes under an identical evaluation budget of 6 trials ($t \in \{0, 1, 2, 3, 4, 5\}$):
+- **Trial #0 (Deterministic Baseline Anchor):** Identical across all four strategies. Evaluates an unregularized `RandomForestClassifier` (depth=10, `OneHotEncoder`, no class balancing, no resampling, no polynomial features) to expose baseline error topologies (train-val generalization gap, minority class recall, and confused class pairs).
+- **Trials #1 to #5 (Strategy-Specific Search Iterations):**
+  - **Random Search:** Samples 5 subsequent configurations independently and uniformly from the declarative 5-layer CASH space.
+  - **Optuna (TPE):** Uses Tree-structured Parzen Estimators (`TPESampler(multivariate=True, seed=42)`) to construct probabilistic surrogate models $p(x|y)$ over prior trial validation scores.
+  - **SEVA (Heuristic Agent):** Inspects the previous trial diagnostic payload and applies deterministic sequential rule-based interventions to resolve diagnosed pathologies (e.g., severe class collapse $\rightarrow$ cost-sensitive weights and threshold tuning; generalization gap $\Delta_{\text{overfit}} > 0.15 \rightarrow$ tree depth reduction, L2 regularization, and feature subsampling; low capacity $\rightarrow$ non-linear gradient boosting).
+  - **SEVA (LLM Agent):** Serializes the diagnostic payload into a structured scientific prompt for the LLM (`Qwen2.5-Instruct`), generating a structured JSON mutation proposal that is validated and self-repaired via Pydantic schemas.
+
+### 5.3 Data Partitioning, Seeds & Cross-Validation Folds
+- **Reference Seed:** `seed=42` is fixed across all data splitters, fold generators, and stochastic baseline samplers to ensure identical experimental conditions.
+- **Stratified Partitioning:** Each OpenML dataset is partitioned upfront into:
+  - **80% Development Partition:** Exclusively used for model exploration, preprocessor fitting, and hyperparameter optimization.
+  - **20% Holdout Test Partition:** Quarantined immediately after download and completely locked during the entire search loop.
+- **5-Fold Cross-Validation:** The 80% Development partition is split into 5 stratified folds (`StratifiedKFold(n_splits=5, shuffle=True, random_state=42)`). All pipeline stages (imputation, scaling, one-hot encoding, SMOTE/resampling, and feature selection) are fit **exclusively inside the 4 training folds** and applied out-of-fold to the 5th validation fold. No test or validation statistics ever leak into training.
+
+### 5.4 Strict Holdout Air-Gap Preservation
+The 20% holdout test partition is **strictly air-gapped from all development and search decisions**:
+- The holdout partition is **never** seen by any imputer, scaler, feature selector, or classifier during the 6 search trials.
+- The holdout partition is **never** used by the Heuristic Agent or the LLM Agent to diagnose errors, formulate hypotheses, or mutate pipeline configurations.
+- The holdout partition is **never** used to select winning configurations or tune decision thresholds.
+- **Single Holdout Evaluation:** Only after a strategy finishes its entire 6-trial search budget is the single winning pipeline retrained on the full 80% Development partition and evaluated **exactly once** on the untouched holdout test partition to verify true out-of-sample generalization.
+
+### 5.5 Model Selection Protocol (Within and Across Strategies)
+- **Within-Strategy Selection:** For any given strategy, the winning pipeline is chosen strictly by the highest arithmetic mean Macro-F1 across the 5 cross-validation folds on the Development partition:
+  $$\text{val\_macro\_f1}_t = \frac{1}{5} \sum_{k=1}^5 \text{Macro-F1}_{k, t}, \quad \text{Winning Pipeline} = \arg\max_{t} (\text{val\_macro\_f1}_t)$$
+- **Cross-Strategy Selection & Comparison:** In the benchmark report and tables, the cross-strategy ranking is determined by comparing their respective peak validation CV scores (`Best Val Macro-F1`). The locked holdout test score is reported purely as an uncorrupted audit metric of generalization, never as a selection criterion.
+
+### 5.6 Calculation of Convergence & Sample Efficiency Metrics
+- **AUC-Convergence (Normalized Discrete Integral):** Quantifies search trajectory efficiency and cumulative regret across the search budget $T=6$. It is calculated as the arithmetic mean of the cumulative best validation score across all budget steps:
   $$\text{AUC-Convergence} = \frac{1}{T} \sum_{t=0}^{T-1} y^*_t, \quad \text{where} \quad y^*_t = \max_{0 \le i \le t} (\text{val\_macro\_f1}_i)$$
-  Because the discrete area under the step-function curve is divided by the evaluation budget $T$, the metric is normalized into $[0.0, 1.0]$ and directly comparable to F1 scores. An agent that discovers high-performing pipelines early accumulates a substantially higher AUC-Convergence than an optimizer discovering solutions late in the budget.
+  Because the discrete area under the step-function trajectory is divided by the budget $T$, the metric is normalized into $[0.0, 1.0]$ and directly comparable to F1 scores. An agent that discovers high-performing configurations early (e.g., Trial #1 or #2) achieves a higher normalized cumulative score than an optimizer that only discovers a strong model in Trial #5.
 - **Sample Efficiency (`Trials to 95% Peak` vs. `Trials to Target Threshold`):**
-  - **`Trials to 95% Peak`:** The earliest trial index $t$ that captured at least 95% of the total validation gain achieved over the baseline Trial 0:
-    $$\text{Target} = \text{val\_macro\_f1}_0 + 0.95 \times \left( \max_{i} \text{val\_macro\_f1}_i - \text{val\_macro\_f1}_0 \right)$$
-  - **`Trials to Target Threshold`:** When invoked with `--target-threshold <float>`, measures the earliest trial index $t$ where $y^*_t \ge \text{threshold}$. If the threshold is never reached within the budget, it returns `None`.
+  - **`Trials to 95% Peak`:** Earliest trial index $t$ that captured at least 95% of the total validation improvement achieved over the Trial 0 baseline:
+    $$\text{Target} = \text{val\_macro\_f1}_0 + 0.95 \times \left( \max_{0 \le i < T} \text{val\_macro\_f1}_i - \text{val\_macro\_f1}_0 \right)$$
+  - **`Trials to Target Threshold`:** Earliest trial index $t$ reaching a user-defined absolute threshold (`--target-threshold <float>`).
 - **Generalization Overfit Gap:** $\Delta_{\text{overfit}} = \text{train\_macro\_f1} - \text{val\_macro\_f1}$, computed across folds and supplied to the agent to diagnose variance pathologies.
-- **LLM Operational Telemetry:** Tracks exact input `prompt_tokens`, generated `completion_tokens`, total tokens, latency, and estimated USD cost per trial based on standard model pricing.
+- **LLM Operational Telemetry:** Tracks input tokens, output tokens, total tokens, call latency, and estimated USD cost based on standard model pricing.
 
-### Execution Parameters, Environment & Reproducibility Logs
+### 5.7 Execution Environment, Library Versions & Reproducibility Logs
 - **Hardware & Software Environment:**
   - Python: `3.12.10`
   - Scikit-learn: `1.9.1`
@@ -131,13 +158,11 @@ The system was evaluated across three OpenML tabular datasets with distinct stru
   - Optuna: `5.0.0`
   - Imbalanced-learn: `0.14.1`
   - Pydantic: `2.14.0`
-- **Reference Seed:** `seed=42` across all data splitters, cross-validation folds, and stochastic baseline samplers.
-- **Per-Trial Artifact Logs:** Every individual trial is serialized to `artifacts/runs/<dataset>__<strategy>__seed<seed>.json`. Each artifact preserves:
-  1. Full declarative `PipelineConfig` parameters (imputer strategy, scaler family, polynomial degree, selector method, classifier hyperparameters).
-  2. Complete diagnostic payloads (train F1, fold-wise val F1, per-class F1, confusion matrix, overfit gap).
-  3. Structured `AgentDecision` (diagnosis, hypothesis, expected outcome, mutation applied).
-  4. Empirical `observed_outcome` and `hypothesis_confirmed` boolean flag.
-  5. Exact execution elapsed runtime and token telemetry.
+- **Per-Trial JSON Logs:** Every trial execution is deterministically logged in `artifacts/runs/<dataset>__<strategy>__seed<seed>.json` with full hyperparameters, fold-level scores, confusion matrices, agent hypotheses, and empirical outcomes.
+- **Deterministic Replay:** Reproduce any pipeline run identically using the CLI:
+  ```bash
+  seva replay --config artifacts/runs/credit-g__seva_heuristic_agent__seed42.json --dataset credit-g --seed 42
+  ```
 
 ---
 
