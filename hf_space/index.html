@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SEVA: Secure Experimentation and Validation Agent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: #111827;
+      --card-border: #1f2937;
+      --accent: #10b981;
+      --accent-hover: #059669;
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --code-bg: #1e293b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 0 1rem 3rem 1rem;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    header {
+      padding: 2.5rem 0 1.5rem 0;
+      border-bottom: 1px solid var(--card-border);
+      margin-bottom: 2rem;
+    }
+    .badge-bar {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.6rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: var(--card-border);
+      color: #93c5fd;
+    }
+    .badge.green { background: #064e3b; color: #6ee7b7; }
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #ffffff 40%, #10b981 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 850px;
+    }
+    .hero-box {
+      background: linear-gradient(180deg, #131d31 0%, var(--card-bg) 100%);
+      border: 1px solid #1e3a5f;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .hero-box p {
+      font-size: 0.95rem;
+      color: #e2e8f0;
+      margin-bottom: 1rem;
+    }
+    .btn-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background-color: var(--accent);
+      color: #0b0f19;
+    }
+    .btn-primary:hover {
+      background-color: var(--accent-hover);
+    }
+    .btn-secondary {
+      background-color: var(--card-border);
+      color: var(--text);
+    }
+    .btn-secondary:hover {
+      background-color: #374151;
+    }
+    .section-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin: 2rem 0 1rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .media-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    .media-card img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .media-caption {
+      padding: 0.85rem 1rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--card-border);
+      background: #0f172a;
+    }
+    .table-responsive {
+      overflow-x: auto;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      margin-bottom: 2rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.875rem;
+    }
+    th, td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--card-border);
+    }
+    th {
+      background-color: #0f172a;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background-color: rgba(255,255,255,0.02); }
+    .highlight-agent {
+      color: #34d399;
+      font-weight: 700;
+    }
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      margin-bottom: 1.5rem;
+      color: #e2e8f0;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+    .card h3 {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      color: #38bdf8;
+    }
+    .card p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--card-border);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge-bar">
+        <span class="badge green">Hugging Face Space</span>
+        <span class="badge">Python 3.12</span>
+        <span class="badge">Scikit-learn</span>
+        <span class="badge">Optuna TPE</span>
+        <span class="badge">MIT License</span>
+      </div>
+      <h1>SEVA: Secure Experimentation and Validation Agent</h1>
+      <p class="subtitle">Autonomous Diagnostic-Driven Machine Learning Pipeline Optimization for Mission-Critical Tabular Intelligence.</p>
+    </header>
+
+    <div class="hero-box">
+      <p>
+        <strong>Core Scientific Hypothesis:</strong> Instead of relying on blind black-box sampling (Random Search or cold Bayesian Optimization),
+        SEVA analyzes training-vs-validation overfit gaps, minority-class representation collapse, and confusion-matrix failure topologies
+        to formulate falsifiable scientific hypotheses and execute targeted 5-layer pipeline mutations.
+      </p>
+      <div class="btn-row">
+        <a class="btn btn-primary" href="https://github.com/LirielC/SEVA" target="_blank">View GitHub Repository</a>
+        <a class="btn btn-secondary" href="#benchmark">View Benchmark Results</a>
+        <a class="btn btn-secondary" href="#quickstart">CLI Quickstart</a>
+      </div>
+    </div>
+
+    <h2 class="section-title">Live Scientific Iteration Loop</h2>
+    <div class="media-card">
+      <img src="artifacts/plots/autoresearcher_demo.gif" alt="SEVA Scientific Progress Loop">
+      <div class="media-caption">
+        Real-time execution telemetry on credit-g: Convergence trajectory alongside quantitative error diagnosis, testable hypothesis, and post-evaluation confirmation.
+      </div>
+    </div>
+
+    <h2 class="section-title" id="benchmark">Four-Strategy Empirical Ablation (OpenML Benchmark)</h2>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Dataset</th>
+            <th>Strategy</th>
+            <th>Baseline F1</th>
+            <th>Best Val Macro-F1</th>
+            <th>Locked Holdout F1</th>
+            <th>Trials to 95% Peak</th>
+            <th>AUC Convergence</th>
+            <th>Mean Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>credit-g</code></td>
+            <td class="highlight-agent">SEVA (Heuristic Agent)</td>
+            <td>0.8505</td>
+            <td>0.9159</td>
+            <td class="highlight-agent">0.9393 (Best)</td>
+            <td>Trial #5</td>
+            <td>0.8806</td>
+            <td>19.8s</td>
+          </tr>
+          <tr>
+            <td><code>credit-g</code></td>
+            <td class="highlight-agent">SEVA (LLM Agent)</td>
+            <td>0.8505</td>
+            <td>0.9159</td>
+            <td class="highlight-agent">0.9393 (Best)</td>
+            <td>Trial #5</td>
+            <td>0.8806</td>
+            <td>19.4s</td>
+          </tr>
+          <tr>
+            <td><code>credit-g</code></td>
+            <td>Optuna (TPE)</td>
+            <td>0.8505</td>
+            <td>0.8969</td>
+            <td>0.8894</td>
+            <td>Trial #1</td>
+            <td>0.8891</td>
+            <td>33.9s</td>
+          </tr>
+          <tr>
+            <td><code>credit-g</code></td>
+            <td>Random Search</td>
+            <td>0.8505</td>
+            <td>0.9221</td>
+            <td>0.9094</td>
+            <td>Trial #3</td>
+            <td>0.9004</td>
+            <td>42.7s</td>
+          </tr>
+          <tr>
+            <td><code>vehicle</code></td>
+            <td class="highlight-agent">SEVA (Heuristic Agent)</td>
+            <td>0.8537</td>
+            <td>0.8904</td>
+            <td class="highlight-agent">0.9013 (Best)</td>
+            <td class="highlight-agent">Trial #2 (Peak)</td>
+            <td>0.8782</td>
+            <td>174.2s</td>
+          </tr>
+          <tr>
+            <td><code>vehicle</code></td>
+            <td class="highlight-agent">SEVA (LLM Agent)</td>
+            <td>0.8537</td>
+            <td>0.8904</td>
+            <td class="highlight-agent">0.9013 (Best)</td>
+            <td class="highlight-agent">Trial #2 (Peak)</td>
+            <td>0.8782</td>
+            <td>173.9s</td>
+          </tr>
+          <tr>
+            <td><code>vehicle</code></td>
+            <td>Optuna (TPE)</td>
+            <td>0.8537</td>
+            <td>0.8610</td>
+            <td>0.8940</td>
+            <td>Trial #1</td>
+            <td>0.8598</td>
+            <td>521.5s</td>
+          </tr>
+          <tr>
+            <td><code>vehicle</code></td>
+            <td>Random Search</td>
+            <td>0.8537</td>
+            <td>0.8537</td>
+            <td>0.8657</td>
+            <td>Trial #0</td>
+            <td>0.8537</td>
+            <td>121.2s</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="section-title">Convergence Trajectories & Sample Efficiency</h2>
+    <div class="media-card">
+      <img src="artifacts/plots/convergence_curves.png" alt="Convergence Curves across Datasets">
+      <div class="media-caption">
+        Validation Macro-F1 progression across budgets: SEVA (Green/Purple) vs. Optuna TPE (Blue), Random Search (Orange), and Grid Search (Gray).
+      </div>
+    </div>
+
+    <div class="media-card">
+      <img src="artifacts/plots/holdout_and_efficiency.png" alt="Holdout Evaluation and Efficiency Comparison">
+      <div class="media-caption">
+        Left: Generalization performance on strictly quarantined 20% holdout test set. Right: Number of trials required to achieve 95% of peak improvement.
+      </div>
+    </div>
+
+    <h2 class="section-title">Key Architectural Principles</h2>
+    <div class="grid-2">
+      <div class="card">
+        <h3>1. Zero Data Leakage</h3>
+        <p>All imputers, encoders, feature engineering operations, and class balance transforms are fitted exclusively within cross-validation training folds. The holdout test set is evaluated once.</p>
+      </div>
+      <div class="card">
+        <h3>2. 5-Layer Declarative CASH Space</h3>
+        <p>Both SEVA and black-box baselines navigate the identical configuration space across numerical scaling, categorical encoding, polynomial/ratio engineering, class rebalancing, and regularized boosting.</p>
+      </div>
+      <div class="card">
+        <h3>3. Scientific Traceability</h3>
+        <p>Every trial records the quantified diagnosis, hypothesis, expected outcome, applied mutation, and observed confirmation status in an auditable Lab Notebook.</p>
+      </div>
+      <div class="card">
+        <h3>4. Deterministic Replay</h3>
+        <p>Any evaluated pipeline can be re-executed from its serialized configuration and random seed with zero variance.</p>
+      </div>
+    </div>
+
+    <h2 class="section-title" id="quickstart">CLI Quickstart</h2>
+    <div class="code-block">
+# Install SEVA
+git clone https://github.com/LirielC/SEVA.git
+cd SEVA
+pip install -e .
+
+# Run single autonomous experiment
+seva run-agent --dataset credit-g --budget 12 --mode heuristic
+
+# Run 4-way comparative ablation benchmark
+seva run-benchmark --budget 12 --seeds 42 101 202
+
+# Deterministically replay any winning pipeline
+seva replay --config artifacts/runs/credit-g__seva_heuristic_agent__seed42.json --dataset credit-g --seed 42
+    </div>
+
+    <footer>
+      <div>SEVA &copy; 2026 LirielC. Licensed under the MIT License.</div>
+      <div><a href="https://github.com/LirielC/SEVA" style="color:#6ee7b7; text-decoration:none;">GitHub Repository &rarr;</a></div>
+    </footer>
+  </div>
+</body>
+</html>

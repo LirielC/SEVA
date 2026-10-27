@@ -3,6 +3,7 @@
 [![CI - Test & Benchmark](https://img.shields.io/badge/CI-Passing-10B981?style=flat&logo=githubactions)](.github/workflows/ci.yml)
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?style=flat&logo=python)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Hugging Face Space](https://img.shields.io/badge/Hugging%20Face-Space%20Demo-yellow)](https://huggingface.co/spaces/Archiel89/SEVA)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.66-FF4B4B?style=flat&logo=streamlit)](app/streamlit_app.py)
 [![MLflow](https://img.shields.io/badge/MLflow-Tracking-0194E2?style=flat&logo=mlflow)](docker-compose.yml)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat&logo=docker)](Dockerfile)
