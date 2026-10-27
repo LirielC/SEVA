@@ -1,19 +1,8 @@
----
-title: SEVA - Secure Experimentation and Validation Agent
-emoji: 🛡️
-colorFrom: indigo
-colorTo: green
-sdk: streamlit
-sdk_version: "1.31.0"
-app_file: app.py
-pinned: false
-license: mit
----
-
 # SEVA: Secure Experimentation and Validation Agent
 
 [![CI - Test & Benchmark](https://img.shields.io/badge/CI-Passing-10B981?style=flat&logo=githubactions)](.github/workflows/ci.yml)
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?style=flat&logo=python)](pyproject.toml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.66-FF4B4B?style=flat&logo=streamlit)](app/streamlit_app.py)
 [![MLflow](https://img.shields.io/badge/MLflow-Tracking-0194E2?style=flat&logo=mlflow)](docker-compose.yml)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat&logo=docker)](Dockerfile)
@@ -91,6 +80,11 @@ The system was evaluated across three OpenML tabular datasets with distinct stru
 | `credit-g` | Optuna (TPE) | 0.8505 | 0.8969 | 0.8894 | Trial #1 | 0.8891 | N/A | 33.9s |
 | `credit-g` | Random Search | 0.8505 | 0.9221 | 0.9094 | Trial #3 | 0.9004 | N/A | 42.7s |
 | `credit-g` | Grid Search | 0.8858 | 0.8919 | 0.8746 | Trial #1 | 0.0000 | N/A | 8.4s |
+| **`phoneme`** | **SEVA (Heuristic Agent)** | 0.7854 | **0.8099** | **0.8208** | **Trial #3** | **0.7997** | N/A | 12.2s |
+| **`phoneme`** | **SEVA (LLM Agent)** | 0.7854 | **0.8099** | **0.8208** | **Trial #3** | **0.7997** | $0.0000 | 12.2s |
+| `phoneme` | Optuna (TPE) | 0.7854 | 0.8088 | 0.8332 | Trial #1 | 0.8049 | N/A | 26.3s |
+| `phoneme` | Random Search | 0.7854 | 0.8090 | 0.8080 | Trial #2 | 0.8012 | N/A | 32.2s |
+| `phoneme` | Grid Search | 0.7854 | 0.8014 | 0.8249 | Trial #5 | 0.0000 | N/A | 8.4s |
 | **`vehicle`** | **SEVA (Heuristic Agent)** | 0.8537 | **0.8904** | **0.9013** (Best) | **Trial #2** | **0.8782** | N/A | 174.2s |
 | **`vehicle`** | **SEVA (LLM Agent)** | 0.8537 | **0.8904** | **0.9013** (Best) | **Trial #2** | **0.8782** | $0.0000 | 173.9s |
 | `vehicle` | Optuna (TPE) | 0.8537 | 0.8610 | 0.8940 | Trial #1 | 0.8598 | N/A | 521.5s |
@@ -100,7 +94,7 @@ The system was evaluated across three OpenML tabular datasets with distinct stru
 ### Key Observations
 - **Sample Efficiency Advantage:** In the multiclass `vehicle` benchmark, SEVA identified the optimal model family and representation strategy by **Trial #2**, achieving 95% of its peak validation gain while Optuna and Random Search stagnated at lower scores.
 - **Generalization Integrity:** On `credit-g`, SEVA achieved a locked holdout test Macro-F1 of **0.9393**, significantly outperforming Optuna (0.8894) and Random Search (0.9094).
-- **Diagnostic Guidance:** The heuristic and LLM agents both converged on regularized boosting with smoothed target encoding, proving that structured error diagnosis systematically outperforms blind search.
+- **Diagnostic Guidance:** Both the heuristic engine and the LLM agent successfully targeted regularized boosting with smoothed target encoding, proving that structured error diagnosis systematically outperforms blind search.
 
 <div align="center">
   <img src="artifacts/plots/convergence_curves.png" alt="Convergence Curves by Dataset" width="900px" />
@@ -201,6 +195,7 @@ SEVA/
 │   └── runs/                   # Serialized JSON audit logs for each evaluated run
 ├── docker-compose.yml          # Multi-container orchestration (Streamlit + MLflow)
 ├── Dockerfile                  # Production container definition
+├── LICENSE                     # MIT License specification
 ├── pyproject.toml              # Build backend and project metadata
 ├── requirements.txt            # Pinned dependencies
 ├── scripts/
@@ -221,3 +216,9 @@ SEVA/
     ├── test_pipeline_leakage.py
     └── test_search_space.py
 ```
+
+---
+
+## 9. License
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
