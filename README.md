@@ -110,7 +110,15 @@ The system was evaluated across three OpenML tabular datasets with distinct stru
 ### 5.1 Scientific Scope & Generalizability Disclaimer
 With an evaluation budget of only six trials ($T=6$) per strategy across three datasets on a single reference seed (`seed=42`), the empirical findings presented in Section 4 represent **promising preliminary evidence** of diagnostic search efficiency rather than a definitive demonstration of universally generalizable superiority. A 6-trial budget illustrates early sample efficiency, but broader benchmarks with higher budgets (e.g., 20–50 trials) and multiple random seeds are essential for comprehensive statistical validation.
 
-### 5.2 Definition of Search Trials
+### 5.2 Equal Trial Budget vs. Computational & Financial Trade-offs
+All four strategies share the exact same baseline anchor (Trial #0), after which they diverge according to fundamentally different search mechanisms. 
+
+To interpret the benchmark results properly, it is critical to note that the comparison is standardized under an **equal budget of evaluation trials ($T=6$)**, rather than equal computational runtime or financial expenditure:
+- **Zero Overhead Baselines:** Random Search and Optuna TPE evaluate candidate pipelines with negligible decision overhead ($< 50\,\text{ms}$) and zero monetary cost, spending virtually all runtime on scikit-learn cross-validation. The Heuristic Agent similarly executes deterministic rule checks in less than $5\,\text{ms}$.
+- **LLM Agent Resource Asymmetry:** The LLM Agent introduces additional latency per trial (2 to 10 seconds per roundtrip for prompt serialization, network transport, token generation, and Pydantic validation) and monetary cost (token consumption from API providers).
+- **The Sample-Efficiency Value Proposition:** The core engineering thesis of SEVA is that when model training or cross-validation is computationally expensive (e.g., millions of rows, complex ensembles, long training cycles), **spending marginal time and a fraction of a cent on LLM qualitative reasoning per trial is a worthwhile trade-off if it converges to superior pipelines in significantly fewer expensive model evaluation cycles**.
+
+### 5.3 Definition of Search Trials
 Each optimization strategy executes under an identical evaluation budget of 6 trials ($t \in \{0, 1, 2, 3, 4, 5\}$):
 - **Trial #0 (Deterministic Baseline Anchor):** Identical across all four strategies. Evaluates an unregularized `RandomForestClassifier` (depth=10, `OneHotEncoder`, no class balancing, no resampling, no polynomial features) to expose baseline error topologies (train-val generalization gap, minority class recall, and confused class pairs).
 - **Trials #1 to #5 (Strategy-Specific Search Iterations):**
@@ -119,26 +127,26 @@ Each optimization strategy executes under an identical evaluation budget of 6 tr
   - **SEVA (Heuristic Agent):** Inspects the previous trial diagnostic payload and applies deterministic sequential rule-based interventions to resolve diagnosed pathologies (e.g., severe class collapse $\rightarrow$ cost-sensitive weights and threshold tuning; generalization gap $\Delta_{\text{overfit}} > 0.15 \rightarrow$ tree depth reduction, L2 regularization, and feature subsampling; low capacity $\rightarrow$ non-linear gradient boosting).
   - **SEVA (LLM Agent):** Serializes the diagnostic payload into a structured scientific prompt for the LLM (`Qwen2.5-Instruct`), generating a structured JSON mutation proposal that is validated and self-repaired via Pydantic schemas.
 
-### 5.3 Data Partitioning, Seeds & Cross-Validation Folds
+### 5.4 Data Partitioning, Seeds & Cross-Validation Folds
 - **Reference Seed:** `seed=42` is fixed across all data splitters, fold generators, and stochastic baseline samplers to ensure identical experimental conditions.
 - **Stratified Partitioning:** Each OpenML dataset is partitioned upfront into:
   - **80% Development Partition:** Exclusively used for model exploration, preprocessor fitting, and hyperparameter optimization.
   - **20% Holdout Test Partition:** Quarantined immediately after download and completely locked during the entire search loop.
 - **5-Fold Cross-Validation:** The 80% Development partition is split into 5 stratified folds (`StratifiedKFold(n_splits=5, shuffle=True, random_state=42)`). All pipeline stages (imputation, scaling, one-hot encoding, SMOTE/resampling, and feature selection) are fit **exclusively inside the 4 training folds** and applied out-of-fold to the 5th validation fold. No test or validation statistics ever leak into training.
 
-### 5.4 Strict Holdout Air-Gap Preservation
+### 5.5 Strict Holdout Air-Gap Preservation
 The 20% holdout test partition is **strictly air-gapped from all development and search decisions**:
 - The holdout partition is **never** seen by any imputer, scaler, feature selector, or classifier during the 6 search trials.
 - The holdout partition is **never** used by the Heuristic Agent or the LLM Agent to diagnose errors, formulate hypotheses, or mutate pipeline configurations.
 - The holdout partition is **never** used to select winning configurations or tune decision thresholds.
 - **Single Holdout Evaluation:** Only after a strategy finishes its entire 6-trial search budget is the single winning pipeline retrained on the full 80% Development partition and evaluated **exactly once** on the untouched holdout test partition to verify true out-of-sample generalization.
 
-### 5.5 Model Selection Protocol (Within and Across Strategies)
+### 5.6 Model Selection Protocol (Within and Across Strategies)
 - **Within-Strategy Selection:** For any given strategy, the winning pipeline is chosen strictly by the highest arithmetic mean Macro-F1 across the 5 cross-validation folds on the Development partition:
   $$\text{val\_macro\_f1}_t = \frac{1}{5} \sum_{k=1}^5 \text{Macro-F1}_{k, t}, \quad \text{Winning Pipeline} = \arg\max_{t} (\text{val\_macro\_f1}_t)$$
 - **Cross-Strategy Selection & Comparison:** In the benchmark report and tables, the cross-strategy ranking is determined by comparing their respective peak validation CV scores (`Best Val Macro-F1`). The locked holdout test score is reported purely as an uncorrupted audit metric of generalization, never as a selection criterion.
 
-### 5.6 Calculation of Convergence & Sample Efficiency Metrics
+### 5.7 Calculation of Convergence & Sample Efficiency Metrics
 - **AUC-Convergence (Normalized Discrete Integral):** Quantifies search trajectory efficiency and cumulative regret across the search budget $T=6$. It is calculated as the arithmetic mean of the cumulative best validation score across all budget steps:
   $$\text{AUC-Convergence} = \frac{1}{T} \sum_{t=0}^{T-1} y^*_t, \quad \text{where} \quad y^*_t = \max_{0 \le i \le t} (\text{val\_macro\_f1}_i)$$
   Because the discrete area under the step-function trajectory is divided by the budget $T$, the metric is normalized into $[0.0, 1.0]$ and directly comparable to F1 scores. An agent that discovers high-performing configurations early (e.g., Trial #1 or #2) achieves a higher normalized cumulative score than an optimizer that only discovers a strong model in Trial #5.
@@ -149,7 +157,7 @@ The 20% holdout test partition is **strictly air-gapped from all development and
 - **Generalization Overfit Gap:** $\Delta_{\text{overfit}} = \text{train\_macro\_f1} - \text{val\_macro\_f1}$, computed across folds and supplied to the agent to diagnose variance pathologies.
 - **LLM Operational Telemetry:** Tracks input tokens, output tokens, total tokens, call latency, and estimated USD cost based on standard model pricing.
 
-### 5.7 Execution Environment, Library Versions & Reproducibility Logs
+### 5.8 Execution Environment, Library Versions & Reproducibility Logs
 - **Hardware & Software Environment:**
   - Python: `3.12.10`
   - Scikit-learn: `1.9.1`
