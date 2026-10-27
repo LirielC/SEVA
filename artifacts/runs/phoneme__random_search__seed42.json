@@ -1,0 +1,533 @@
+{
+  "strategy_name": "Random Search",
+  "dataset_name": "phoneme",
+  "seed": 42,
+  "budget": 8,
+  "best_val_macro_f1": 0.80902,
+  "holdout_test_macro_f1": 0.808,
+  "baseline_val_macro_f1": 0.7854,
+  "improvement_over_baseline": 0.02362,
+  "trials_to_95pct_peak": 2,
+  "total_elapsed_seconds": 35.1999,
+  "best_config": {
+    "imputer": "mean",
+    "scaler": "robust",
+    "categorical_encoder": "target_smooth",
+    "feature_engineering": "ratios_top5",
+    "imbalance_strategy": "none",
+    "threshold_tuning": true,
+    "model_family": "xgboost",
+    "n_estimators": 180,
+    "max_depth": 5,
+    "learning_rate": 0.03,
+    "regularization": 12.0,
+    "subsample": 1.0,
+    "min_samples_leaf": 8
+  },
+  "trials": [
+    {
+      "trial_index": 0,
+      "strategy_name": "Random Search",
+      "dataset_name": "phoneme",
+      "seed": 42,
+      "config": {
+        "imputer": "median",
+        "scaler": "none",
+        "categorical_encoder": "onehot",
+        "feature_engineering": "none",
+        "imbalance_strategy": "none",
+        "threshold_tuning": false,
+        "model_family": "random_forest",
+        "n_estimators": 100,
+        "max_depth": 10,
+        "learning_rate": 0.1,
+        "regularization": 1.0,
+        "subsample": 1.0,
+        "min_samples_leaf": 1
+      },
+      "config_hash": "b8f37a49ce80",
+      "diagnostics": {
+        "val_macro_f1": 0.7854,
+        "val_std_f1": 0.03143,
+        "train_macro_f1": 0.99452,
+        "overfit_gap": 0.20912,
+        "val_balanced_accuracy": 0.78494,
+        "per_class_f1": {
+          "nasal": 0.8004,
+          "oral": 0.7704
+        },
+        "worst_class_label": "oral",
+        "worst_class_f1": 0.7704,
+        "best_class_f1": 0.8004,
+        "top_confused_pairs": [
+          {
+            "true_class": "oral",
+            "predicted_class": "nasal",
+            "error_count": 118,
+            "error_rate_within_true_class": 0.2554
+          },
+          {
+            "true_class": "nasal",
+            "predicted_class": "oral",
+            "error_count": 87,
+            "error_rate_within_true_class": 0.1747
+          }
+        ],
+        "top_features": [
+          "formant_freq_3 (0.199)",
+          "formant_freq_1 (0.194)",
+          "formant_freq_2 (0.125)",
+          "formant_freq_5 (0.110)",
+          "formant_freq_4 (0.107)"
+        ],
+        "primary_pathology": "severe_overfitting",
+        "diagnostic_summary_text": "Val Macro-F1=0.7854 (±0.0314), Train Macro-F1=0.9945 (Overfit Gap=+0.2091). Worst Class='oral' (F1=0.7704 vs Best=0.8004). Top Confusion: oral->nasal (118 errors). Primary Pathology: severe_overfitting."
+      },
+      "best_val_macro_f1_so_far": 0.7854,
+      "elapsed_seconds": 0.9296,
+      "agent_decision": null,
+      "was_new_best": true
+    },
+    {
+      "trial_index": 1,
+      "strategy_name": "Random Search",
+      "dataset_name": "phoneme",
+      "seed": 42,
+      "config": {
+        "imputer": "median",
+        "scaler": "minmax",
+        "categorical_encoder": "ordinal",
+        "feature_engineering": "ratios_top5",
+        "imbalance_strategy": "class_weight_balanced",
+        "threshold_tuning": true,
+        "model_family": "random_forest",
+        "n_estimators": 250,
+        "max_depth": 4,
+        "learning_rate": 0.03,
+        "regularization": 3.0,
+        "subsample": 1.0,
+        "min_samples_leaf": 8
+      },
+      "config_hash": "510b2ba1aae3",
+      "diagnostics": {
+        "val_macro_f1": 0.73969,
+        "val_std_f1": 0.03389,
+        "train_macro_f1": 0.82649,
+        "overfit_gap": 0.0868,
+        "val_balanced_accuracy": 0.74218,
+        "per_class_f1": {
+          "nasal": 0.7371,
+          "oral": 0.7441
+        },
+        "worst_class_label": "nasal",
+        "worst_class_f1": 0.7371,
+        "best_class_f1": 0.7441,
+        "top_confused_pairs": [
+          {
+            "true_class": "nasal",
+            "predicted_class": "oral",
+            "error_count": 149,
+            "error_rate_within_true_class": 0.2992
+          },
+          {
+            "true_class": "oral",
+            "predicted_class": "nasal",
+            "error_count": 100,
+            "error_rate_within_true_class": 0.2165
+          }
+        ],
+        "top_features": [
+          "formant_freq_3 (0.066)",
+          "engineered_feat_23 (0.061)",
+          "engineered_feat_22 (0.059)",
+          "engineered_feat_24 (0.058)",
+          "engineered_feat_17 (0.054)"
+        ],
+        "primary_pathology": "well_balanced_needs_fine_tuning",
+        "diagnostic_summary_text": "Val Macro-F1=0.7397 (±0.0339), Train Macro-F1=0.8265 (Overfit Gap=+0.0868). Worst Class='nasal' (F1=0.7371 vs Best=0.7441). Top Confusion: nasal->oral (149 errors). Primary Pathology: well_balanced_needs_fine_tuning."
+      },
+      "best_val_macro_f1_so_far": 0.7854,
+      "elapsed_seconds": 3.1469,
+      "agent_decision": null,
+      "was_new_best": false
+    },
+    {
+      "trial_index": 2,
+      "strategy_name": "Random Search",
+      "dataset_name": "phoneme",
+      "seed": 42,
+      "config": {
+        "imputer": "mean",
+        "scaler": "robust",
+        "categorical_encoder": "target_smooth",
+        "feature_engineering": "ratios_top5",
+        "imbalance_strategy": "none",
+        "threshold_tuning": true,
+        "model_family": "xgboost",
+        "n_estimators": 180,
+        "max_depth": 5,
+        "learning_rate": 0.03,
+        "regularization": 12.0,
+        "subsample": 1.0,
+        "min_samples_leaf": 8
+      },
+      "config_hash": "1160937d9ed7",
+      "diagnostics": {
+        "val_macro_f1": 0.80902,
+        "val_std_f1": 0.02722,
+        "train_macro_f1": 0.89753,
+        "overfit_gap": 0.08851,
+        "val_balanced_accuracy": 0.80915,
+        "per_class_f1": {
+          "nasal": 0.8161,
+          "oral": 0.8022
+        },
+        "worst_class_label": "oral",
+        "worst_class_f1": 0.8022,
+        "best_class_f1": 0.8161,
+        "top_confused_pairs": [
+          {
+            "true_class": "nasal",
+            "predicted_class": "oral",
+            "error_count": 92,
+            "error_rate_within_true_class": 0.1847
+          },
+          {
+            "true_class": "oral",
+            "predicted_class": "nasal",
+            "error_count": 91,
+            "error_rate_within_true_class": 0.197
+          }
+        ],
+        "top_features": [
+          "engineered_feat_9 (0.112)",
+          "engineered_feat_17 (0.054)",
+          "engineered_feat_11 (0.054)",
+          "engineered_feat_24 (0.049)",
+          "engineered_feat_13 (0.048)"
+        ],
+        "primary_pathology": "well_balanced_needs_fine_tuning",
+        "diagnostic_summary_text": "Val Macro-F1=0.8090 (±0.0272), Train Macro-F1=0.8975 (Overfit Gap=+0.0885). Worst Class='oral' (F1=0.8022 vs Best=0.8161). Top Confusion: nasal->oral (92 errors). Primary Pathology: well_balanced_needs_fine_tuning."
+      },
+      "best_val_macro_f1_so_far": 0.80902,
+      "elapsed_seconds": 1.0624,
+      "agent_decision": null,
+      "was_new_best": true
+    },
+    {
+      "trial_index": 3,
+      "strategy_name": "Random Search",
+      "dataset_name": "phoneme",
+      "seed": 42,
+      "config": {
+        "imputer": "median",
+        "scaler": "minmax",
+        "categorical_encoder": "ordinal",
+        "feature_engineering": "ratios_top5",
+        "imbalance_strategy": "class_weight_balanced",
+        "threshold_tuning": false,
+        "model_family": "random_forest",
+        "n_estimators": 180,
+        "max_depth": 10,
+        "learning_rate": 0.03,
+        "regularization": 12.0,
+        "subsample": 1.0,
+        "min_samples_leaf": 2
+      },
+      "config_hash": "c3af3c60b175",
+      "diagnostics": {
+        "val_macro_f1": 0.79226,
+        "val_std_f1": 0.03837,
+        "train_macro_f1": 0.97601,
+        "overfit_gap": 0.18375,
+        "val_balanced_accuracy": 0.7923,
+        "per_class_f1": {
+          "nasal": 0.8008,
+          "oral": 0.7839
+        },
+        "worst_class_label": "oral",
+        "worst_class_f1": 0.7839,
+        "best_class_f1": 0.8008,
+        "top_confused_pairs": [
+          {
+            "true_class": "oral",
+            "predicted_class": "nasal",
+            "error_count": 101,
+            "error_rate_within_true_class": 0.2186
+          },
+          {
+            "true_class": "nasal",
+            "predicted_class": "oral",
+            "error_count": 98,
+            "error_rate_within_true_class": 0.1968
+          }
+        ],
+        "top_features": [
+          "formant_freq_1 (0.055)",
+          "engineered_feat_24 (0.052)",
+          "engineered_feat_22 (0.051)",
+          "engineered_feat_23 (0.048)",
+          "formant_freq_3 (0.046)"
+        ],
+        "primary_pathology": "severe_overfitting",
+        "diagnostic_summary_text": "Val Macro-F1=0.7923 (±0.0384), Train Macro-F1=0.9760 (Overfit Gap=+0.1837). Worst Class='oral' (F1=0.7839 vs Best=0.8008). Top Confusion: oral->nasal (101 errors). Primary Pathology: severe_overfitting."
+      },
+      "best_val_macro_f1_so_far": 0.80902,
+      "elapsed_seconds": 2.6671,
+      "agent_decision": null,
+      "was_new_best": false
+    },
+    {
+      "trial_index": 4,
+      "strategy_name": "Random Search",
+      "dataset_name": "phoneme",
+      "seed": 42,
+      "config": {
+        "imputer": "mean",
+        "scaler": "none",
+        "categorical_encoder": "target_smooth",
+        "feature_engineering": "mutual_info_k80",
+        "imbalance_strategy": "class_weight_balanced",
+        "threshold_tuning": false,
+        "model_family": "catboost",
+        "n_estimators": 180,
+        "max_depth": 10,
+        "learning_rate": 0.12,
+        "regularization": 6.0,
+        "subsample": 1.0,
+        "min_samples_leaf": 1
+      },
+      "config_hash": "6d7cf8bc8e8a",
+      "diagnostics": {
+        "val_macro_f1": 0.79546,
+        "val_std_f1": 0.03343,
+        "train_macro_f1": 0.94029,
+        "overfit_gap": 0.14483,
+        "val_balanced_accuracy": 0.79602,
+        "per_class_f1": {
+          "nasal": 0.8008,
+          "oral": 0.7906
+        },
+        "worst_class_label": "oral",
+        "worst_class_f1": 0.7906,
+        "best_class_f1": 0.8008,
+        "top_confused_pairs": [
+          {
+            "true_class": "nasal",
+            "predicted_class": "oral",
+            "error_count": 104,
+            "error_rate_within_true_class": 0.2088
+          },
+          {
+            "true_class": "oral",
+            "predicted_class": "nasal",
+            "error_count": 92,
+            "error_rate_within_true_class": 0.1991
+          }
+        ],
+        "top_features": [
+          "formant_freq_1 (27.792)",
+          "formant_freq_2 (24.323)",
+          "formant_freq_3 (15.515)",
+          "formant_freq_6 (11.734)",
+          "formant_freq_5 (10.588)"
+        ],
+        "primary_pathology": "severe_overfitting",
+        "diagnostic_summary_text": "Val Macro-F1=0.7955 (±0.0334), Train Macro-F1=0.9403 (Overfit Gap=+0.1448). Worst Class='oral' (F1=0.7906 vs Best=0.8008). Top Confusion: nasal->oral (104 errors). Primary Pathology: severe_overfitting."
+      },
+      "best_val_macro_f1_so_far": 0.80902,
+      "elapsed_seconds": 8.7116,
+      "agent_decision": null,
+      "was_new_best": false
+    },
+    {
+      "trial_index": 5,
+      "strategy_name": "Random Search",
+      "dataset_name": "phoneme",
+      "seed": 42,
+      "config": {
+        "imputer": "median",
+        "scaler": "standard",
+        "categorical_encoder": "ordinal",
+        "feature_engineering": "none",
+        "imbalance_strategy": "random_oversample",
+        "threshold_tuning": false,
+        "model_family": "catboost",
+        "n_estimators": 250,
+        "max_depth": 10,
+        "learning_rate": 0.12,
+        "regularization": 1.0,
+        "subsample": 1.0,
+        "min_samples_leaf": 4
+      },
+      "config_hash": "350e78c07a6a",
+      "diagnostics": {
+        "val_macro_f1": 0.7985,
+        "val_std_f1": 0.03588,
+        "train_macro_f1": 1.0,
+        "overfit_gap": 0.2015,
+        "val_balanced_accuracy": 0.79879,
+        "per_class_f1": {
+          "nasal": 0.8056,
+          "oral": 0.7918
+        },
+        "worst_class_label": "oral",
+        "worst_class_f1": 0.7918,
+        "best_class_f1": 0.8056,
+        "top_confused_pairs": [
+          {
+            "true_class": "nasal",
+            "predicted_class": "oral",
+            "error_count": 98,
+            "error_rate_within_true_class": 0.1968
+          },
+          {
+            "true_class": "oral",
+            "predicted_class": "nasal",
+            "error_count": 95,
+            "error_rate_within_true_class": 0.2056
+          }
+        ],
+        "top_features": [
+          "formant_freq_1 (21.320)",
+          "formant_freq_3 (19.113)",
+          "formant_freq_2 (14.308)",
+          "formant_freq_7 (10.475)",
+          "formant_freq_4 (9.379)"
+        ],
+        "primary_pathology": "severe_overfitting",
+        "diagnostic_summary_text": "Val Macro-F1=0.7985 (±0.0359), Train Macro-F1=1.0000 (Overfit Gap=+0.2015). Worst Class='oral' (F1=0.7918 vs Best=0.8056). Top Confusion: nasal->oral (98 errors). Primary Pathology: severe_overfitting."
+      },
+      "best_val_macro_f1_so_far": 0.80902,
+      "elapsed_seconds": 15.6676,
+      "agent_decision": null,
+      "was_new_best": false
+    },
+    {
+      "trial_index": 6,
+      "strategy_name": "Random Search",
+      "dataset_name": "phoneme",
+      "seed": 42,
+      "config": {
+        "imputer": "median",
+        "scaler": "minmax",
+        "categorical_encoder": "ordinal",
+        "feature_engineering": "none",
+        "imbalance_strategy": "class_weight_balanced",
+        "threshold_tuning": true,
+        "model_family": "random_forest",
+        "n_estimators": 180,
+        "max_depth": 3,
+        "learning_rate": 0.12,
+        "regularization": 1.0,
+        "subsample": 0.8,
+        "min_samples_leaf": 2
+      },
+      "config_hash": "f5dd255f30fd",
+      "diagnostics": {
+        "val_macro_f1": 0.69653,
+        "val_std_f1": 0.03406,
+        "train_macro_f1": 0.77999,
+        "overfit_gap": 0.08346,
+        "val_balanced_accuracy": 0.69707,
+        "per_class_f1": {
+          "nasal": 0.7283,
+          "oral": 0.6651
+        },
+        "worst_class_label": "oral",
+        "worst_class_f1": 0.6651,
+        "best_class_f1": 0.7283,
+        "top_confused_pairs": [
+          {
+            "true_class": "oral",
+            "predicted_class": "nasal",
+            "error_count": 176,
+            "error_rate_within_true_class": 0.381
+          },
+          {
+            "true_class": "nasal",
+            "predicted_class": "oral",
+            "error_count": 112,
+            "error_rate_within_true_class": 0.2249
+          }
+        ],
+        "top_features": [
+          "formant_freq_3 (0.306)",
+          "formant_freq_1 (0.205)",
+          "formant_freq_5 (0.117)",
+          "formant_freq_4 (0.099)",
+          "formant_freq_8 (0.096)"
+        ],
+        "primary_pathology": "feature_noise_or_representation",
+        "diagnostic_summary_text": "Val Macro-F1=0.6965 (±0.0341), Train Macro-F1=0.7800 (Overfit Gap=+0.0835). Worst Class='oral' (F1=0.6651 vs Best=0.7283). Top Confusion: oral->nasal (176 errors). Primary Pathology: feature_noise_or_representation."
+      },
+      "best_val_macro_f1_so_far": 0.80902,
+      "elapsed_seconds": 1.865,
+      "agent_decision": null,
+      "was_new_best": false
+    },
+    {
+      "trial_index": 7,
+      "strategy_name": "Random Search",
+      "dataset_name": "phoneme",
+      "seed": 42,
+      "config": {
+        "imputer": "mean",
+        "scaler": "robust",
+        "categorical_encoder": "target_smooth",
+        "feature_engineering": "ratios_top5",
+        "imbalance_strategy": "none",
+        "threshold_tuning": true,
+        "model_family": "xgboost",
+        "n_estimators": 250,
+        "max_depth": 3,
+        "learning_rate": 0.05,
+        "regularization": 6.0,
+        "subsample": 1.0,
+        "min_samples_leaf": 4
+      },
+      "config_hash": "a4f018b609d0",
+      "diagnostics": {
+        "val_macro_f1": 0.79422,
+        "val_std_f1": 0.01465,
+        "train_macro_f1": 0.91987,
+        "overfit_gap": 0.12565,
+        "val_balanced_accuracy": 0.79462,
+        "per_class_f1": {
+          "nasal": 0.8016,
+          "oral": 0.7875
+        },
+        "worst_class_label": "oral",
+        "worst_class_f1": 0.7875,
+        "best_class_f1": 0.8016,
+        "top_confused_pairs": [
+          {
+            "true_class": "nasal",
+            "predicted_class": "oral",
+            "error_count": 100,
+            "error_rate_within_true_class": 0.2008
+          },
+          {
+            "true_class": "oral",
+            "predicted_class": "nasal",
+            "error_count": 97,
+            "error_rate_within_true_class": 0.21
+          }
+        ],
+        "top_features": [
+          "engineered_feat_9 (0.103)",
+          "engineered_feat_23 (0.063)",
+          "formant_freq_2 (0.062)",
+          "engineered_feat_11 (0.051)",
+          "engineered_feat_25 (0.049)"
+        ],
+        "primary_pathology": "well_balanced_needs_fine_tuning",
+        "diagnostic_summary_text": "Val Macro-F1=0.7942 (±0.0146), Train Macro-F1=0.9199 (Overfit Gap=+0.1257). Worst Class='oral' (F1=0.7875 vs Best=0.8016). Top Confusion: nasal->oral (100 errors). Primary Pathology: well_balanced_needs_fine_tuning."
+      },
+      "best_val_macro_f1_so_far": 0.80902,
+      "elapsed_seconds": 0.9215,
+      "agent_decision": null,
+      "was_new_best": false
+    }
+  ]
+}

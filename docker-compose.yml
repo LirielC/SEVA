@@ -1,0 +1,37 @@
+services:
+  streamlit:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: autoresearcher_dashboard
+    ports:
+      - "8501:8501"
+    environment:
+      - AUTORESEARCHER_AGENT_MODE=${AUTORESEARCHER_AGENT_MODE:-auto}
+      - AUTORESEARCHER_LLM_BASE_URL=${AUTORESEARCHER_LLM_BASE_URL:-https://openrouter.ai/api/v1}
+      - AUTORESEARCHER_LLM_API_KEY=${AUTORESEARCHER_LLM_API_KEY:-}
+      - AUTORESEARCHER_LLM_MODEL=${AUTORESEARCHER_LLM_MODEL:-qwen/qwen-2.5-7b-instruct}
+      - AUTORESEARCHER_ARTIFACTS_DIR=/app/artifacts
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+    volumes:
+      - ./artifacts:/app/artifacts
+    command: ["streamlit", "run", "app/streamlit_app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+    depends_on:
+      - mlflow
+
+  mlflow:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: autoresearcher_mlflow
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./artifacts:/app/artifacts
+    command: [
+      "mlflow", "server",
+      "--backend-store-uri", "sqlite:////app/artifacts/mlflow.db",
+      "--default-artifact-root", "/app/artifacts/mlruns",
+      "--host", "0.0.0.0",
+      "--port", "5000"
+    ]

@@ -1,0 +1,533 @@
+{
+  "strategy_name": "Grid Search",
+  "dataset_name": "credit-g",
+  "seed": 42,
+  "budget": 8,
+  "best_val_macro_f1": 0.89192,
+  "holdout_test_macro_f1": 0.87461,
+  "baseline_val_macro_f1": 0.88581,
+  "improvement_over_baseline": 0.00611,
+  "trials_to_95pct_peak": 1,
+  "total_elapsed_seconds": 8.4302,
+  "best_config": {
+    "imputer": "median",
+    "scaler": "none",
+    "categorical_encoder": "onehot",
+    "feature_engineering": "none",
+    "imbalance_strategy": "none",
+    "threshold_tuning": false,
+    "model_family": "random_forest",
+    "n_estimators": 150,
+    "max_depth": 10,
+    "learning_rate": 0.1,
+    "regularization": 1.0,
+    "subsample": 0.9,
+    "min_samples_leaf": 2
+  },
+  "trials": [
+    {
+      "trial_index": 0,
+      "strategy_name": "Grid Search",
+      "dataset_name": "credit-g",
+      "seed": 42,
+      "config": {
+        "imputer": "median",
+        "scaler": "none",
+        "categorical_encoder": "onehot",
+        "feature_engineering": "none",
+        "imbalance_strategy": "none",
+        "threshold_tuning": false,
+        "model_family": "random_forest",
+        "n_estimators": 100,
+        "max_depth": 10,
+        "learning_rate": 0.1,
+        "regularization": 1.0,
+        "subsample": 1.0,
+        "min_samples_leaf": 1
+      },
+      "config_hash": "b8f37a49ce80",
+      "diagnostics": {
+        "val_macro_f1": 0.88581,
+        "val_std_f1": 0.02696,
+        "train_macro_f1": 0.99484,
+        "overfit_gap": 0.10903,
+        "val_balanced_accuracy": 0.87355,
+        "per_class_f1": {
+          "bad": 0.838,
+          "good": 0.934
+        },
+        "worst_class_label": "bad",
+        "worst_class_f1": 0.838,
+        "best_class_f1": 0.934,
+        "top_confused_pairs": [
+          {
+            "true_class": "bad",
+            "predicted_class": "good",
+            "error_count": 52,
+            "error_rate_within_true_class": 0.2114
+          },
+          {
+            "true_class": "good",
+            "predicted_class": "bad",
+            "error_count": 23,
+            "error_rate_within_true_class": 0.0415
+          }
+        ],
+        "top_features": [
+          "num_feat_9 (0.195)",
+          "num_feat_11 (0.143)",
+          "num_feat_6 (0.132)",
+          "num_feat_7 (0.107)",
+          "num_feat_5 (0.103)"
+        ],
+        "primary_pathology": "well_balanced_needs_fine_tuning",
+        "diagnostic_summary_text": "Val Macro-F1=0.8858 (±0.0270), Train Macro-F1=0.9948 (Overfit Gap=+0.1090). Worst Class='bad' (F1=0.8380 vs Best=0.9340). Top Confusion: bad->good (52 errors). Primary Pathology: well_balanced_needs_fine_tuning."
+      },
+      "best_val_macro_f1_so_far": 0.88581,
+      "elapsed_seconds": 0.9929,
+      "agent_decision": null,
+      "was_new_best": true
+    },
+    {
+      "trial_index": 1,
+      "strategy_name": "Grid Search",
+      "dataset_name": "credit-g",
+      "seed": 42,
+      "config": {
+        "imputer": "median",
+        "scaler": "none",
+        "categorical_encoder": "onehot",
+        "feature_engineering": "none",
+        "imbalance_strategy": "none",
+        "threshold_tuning": false,
+        "model_family": "random_forest",
+        "n_estimators": 150,
+        "max_depth": 10,
+        "learning_rate": 0.1,
+        "regularization": 1.0,
+        "subsample": 0.9,
+        "min_samples_leaf": 2
+      },
+      "config_hash": "34784556f41a",
+      "diagnostics": {
+        "val_macro_f1": 0.89192,
+        "val_std_f1": 0.0282,
+        "train_macro_f1": 0.98002,
+        "overfit_gap": 0.0881,
+        "val_balanced_accuracy": 0.87942,
+        "per_class_f1": {
+          "bad": 0.8467,
+          "good": 0.9376
+        },
+        "worst_class_label": "bad",
+        "worst_class_f1": 0.8467,
+        "best_class_f1": 0.9376,
+        "top_confused_pairs": [
+          {
+            "true_class": "bad",
+            "predicted_class": "good",
+            "error_count": 50,
+            "error_rate_within_true_class": 0.2033
+          },
+          {
+            "true_class": "good",
+            "predicted_class": "bad",
+            "error_count": 21,
+            "error_rate_within_true_class": 0.0379
+          }
+        ],
+        "top_features": [
+          "num_feat_9 (0.200)",
+          "num_feat_11 (0.142)",
+          "num_feat_6 (0.139)",
+          "num_feat_5 (0.107)",
+          "num_feat_7 (0.106)"
+        ],
+        "primary_pathology": "well_balanced_needs_fine_tuning",
+        "diagnostic_summary_text": "Val Macro-F1=0.8919 (±0.0282), Train Macro-F1=0.9800 (Overfit Gap=+0.0881). Worst Class='bad' (F1=0.8467 vs Best=0.9376). Top Confusion: bad->good (50 errors). Primary Pathology: well_balanced_needs_fine_tuning."
+      },
+      "best_val_macro_f1_so_far": 0.89192,
+      "elapsed_seconds": 1.3692,
+      "agent_decision": null,
+      "was_new_best": true
+    },
+    {
+      "trial_index": 2,
+      "strategy_name": "Grid Search",
+      "dataset_name": "credit-g",
+      "seed": 42,
+      "config": {
+        "imputer": "median",
+        "scaler": "standard",
+        "categorical_encoder": "onehot",
+        "feature_engineering": "none",
+        "imbalance_strategy": "none",
+        "threshold_tuning": false,
+        "model_family": "random_forest",
+        "n_estimators": 150,
+        "max_depth": 10,
+        "learning_rate": 0.1,
+        "regularization": 1.0,
+        "subsample": 0.9,
+        "min_samples_leaf": 2
+      },
+      "config_hash": "a15cd8224f9b",
+      "diagnostics": {
+        "val_macro_f1": 0.89192,
+        "val_std_f1": 0.0282,
+        "train_macro_f1": 0.98002,
+        "overfit_gap": 0.0881,
+        "val_balanced_accuracy": 0.87942,
+        "per_class_f1": {
+          "bad": 0.8467,
+          "good": 0.9376
+        },
+        "worst_class_label": "bad",
+        "worst_class_f1": 0.8467,
+        "best_class_f1": 0.9376,
+        "top_confused_pairs": [
+          {
+            "true_class": "bad",
+            "predicted_class": "good",
+            "error_count": 50,
+            "error_rate_within_true_class": 0.2033
+          },
+          {
+            "true_class": "good",
+            "predicted_class": "bad",
+            "error_count": 21,
+            "error_rate_within_true_class": 0.0379
+          }
+        ],
+        "top_features": [
+          "num_feat_9 (0.200)",
+          "num_feat_11 (0.142)",
+          "num_feat_6 (0.139)",
+          "num_feat_5 (0.107)",
+          "num_feat_7 (0.106)"
+        ],
+        "primary_pathology": "well_balanced_needs_fine_tuning",
+        "diagnostic_summary_text": "Val Macro-F1=0.8919 (±0.0282), Train Macro-F1=0.9800 (Overfit Gap=+0.0881). Worst Class='bad' (F1=0.8467 vs Best=0.9376). Top Confusion: bad->good (50 errors). Primary Pathology: well_balanced_needs_fine_tuning."
+      },
+      "best_val_macro_f1_so_far": 0.89192,
+      "elapsed_seconds": 1.3579,
+      "agent_decision": null,
+      "was_new_best": false
+    },
+    {
+      "trial_index": 3,
+      "strategy_name": "Grid Search",
+      "dataset_name": "credit-g",
+      "seed": 42,
+      "config": {
+        "imputer": "median",
+        "scaler": "none",
+        "categorical_encoder": "ordinal",
+        "feature_engineering": "none",
+        "imbalance_strategy": "none",
+        "threshold_tuning": false,
+        "model_family": "random_forest",
+        "n_estimators": 150,
+        "max_depth": 10,
+        "learning_rate": 0.1,
+        "regularization": 1.0,
+        "subsample": 0.9,
+        "min_samples_leaf": 2
+      },
+      "config_hash": "c7a2fc414bb4",
+      "diagnostics": {
+        "val_macro_f1": 0.89192,
+        "val_std_f1": 0.0282,
+        "train_macro_f1": 0.98002,
+        "overfit_gap": 0.0881,
+        "val_balanced_accuracy": 0.87942,
+        "per_class_f1": {
+          "bad": 0.8467,
+          "good": 0.9376
+        },
+        "worst_class_label": "bad",
+        "worst_class_f1": 0.8467,
+        "best_class_f1": 0.9376,
+        "top_confused_pairs": [
+          {
+            "true_class": "bad",
+            "predicted_class": "good",
+            "error_count": 50,
+            "error_rate_within_true_class": 0.2033
+          },
+          {
+            "true_class": "good",
+            "predicted_class": "bad",
+            "error_count": 21,
+            "error_rate_within_true_class": 0.0379
+          }
+        ],
+        "top_features": [
+          "num_feat_9 (0.200)",
+          "num_feat_11 (0.142)",
+          "num_feat_6 (0.139)",
+          "num_feat_5 (0.107)",
+          "num_feat_7 (0.106)"
+        ],
+        "primary_pathology": "well_balanced_needs_fine_tuning",
+        "diagnostic_summary_text": "Val Macro-F1=0.8919 (±0.0282), Train Macro-F1=0.9800 (Overfit Gap=+0.0881). Worst Class='bad' (F1=0.8467 vs Best=0.9376). Top Confusion: bad->good (50 errors). Primary Pathology: well_balanced_needs_fine_tuning."
+      },
+      "best_val_macro_f1_so_far": 0.89192,
+      "elapsed_seconds": 1.3824,
+      "agent_decision": null,
+      "was_new_best": false
+    },
+    {
+      "trial_index": 4,
+      "strategy_name": "Grid Search",
+      "dataset_name": "credit-g",
+      "seed": 42,
+      "config": {
+        "imputer": "median",
+        "scaler": "standard",
+        "categorical_encoder": "ordinal",
+        "feature_engineering": "none",
+        "imbalance_strategy": "none",
+        "threshold_tuning": false,
+        "model_family": "random_forest",
+        "n_estimators": 150,
+        "max_depth": 10,
+        "learning_rate": 0.1,
+        "regularization": 1.0,
+        "subsample": 0.9,
+        "min_samples_leaf": 2
+      },
+      "config_hash": "fa802be235aa",
+      "diagnostics": {
+        "val_macro_f1": 0.89192,
+        "val_std_f1": 0.0282,
+        "train_macro_f1": 0.98002,
+        "overfit_gap": 0.0881,
+        "val_balanced_accuracy": 0.87942,
+        "per_class_f1": {
+          "bad": 0.8467,
+          "good": 0.9376
+        },
+        "worst_class_label": "bad",
+        "worst_class_f1": 0.8467,
+        "best_class_f1": 0.9376,
+        "top_confused_pairs": [
+          {
+            "true_class": "bad",
+            "predicted_class": "good",
+            "error_count": 50,
+            "error_rate_within_true_class": 0.2033
+          },
+          {
+            "true_class": "good",
+            "predicted_class": "bad",
+            "error_count": 21,
+            "error_rate_within_true_class": 0.0379
+          }
+        ],
+        "top_features": [
+          "num_feat_9 (0.200)",
+          "num_feat_11 (0.142)",
+          "num_feat_6 (0.139)",
+          "num_feat_5 (0.107)",
+          "num_feat_7 (0.106)"
+        ],
+        "primary_pathology": "well_balanced_needs_fine_tuning",
+        "diagnostic_summary_text": "Val Macro-F1=0.8919 (±0.0282), Train Macro-F1=0.9800 (Overfit Gap=+0.0881). Worst Class='bad' (F1=0.8467 vs Best=0.9376). Top Confusion: bad->good (50 errors). Primary Pathology: well_balanced_needs_fine_tuning."
+      },
+      "best_val_macro_f1_so_far": 0.89192,
+      "elapsed_seconds": 1.3578,
+      "agent_decision": null,
+      "was_new_best": false
+    },
+    {
+      "trial_index": 5,
+      "strategy_name": "Grid Search",
+      "dataset_name": "credit-g",
+      "seed": 42,
+      "config": {
+        "imputer": "median",
+        "scaler": "none",
+        "categorical_encoder": "onehot",
+        "feature_engineering": "none",
+        "imbalance_strategy": "none",
+        "threshold_tuning": false,
+        "model_family": "xgboost",
+        "n_estimators": 150,
+        "max_depth": 10,
+        "learning_rate": 0.1,
+        "regularization": 1.0,
+        "subsample": 0.9,
+        "min_samples_leaf": 2
+      },
+      "config_hash": "a94fcd14b242",
+      "diagnostics": {
+        "val_macro_f1": 0.88181,
+        "val_std_f1": 0.03058,
+        "train_macro_f1": 1.0,
+        "overfit_gap": 0.11819,
+        "val_balanced_accuracy": 0.87559,
+        "per_class_f1": {
+          "bad": 0.8344,
+          "good": 0.9297
+        },
+        "worst_class_label": "bad",
+        "worst_class_f1": 0.8344,
+        "best_class_f1": 0.9297,
+        "top_confused_pairs": [
+          {
+            "true_class": "bad",
+            "predicted_class": "good",
+            "error_count": 47,
+            "error_rate_within_true_class": 0.1911
+          },
+          {
+            "true_class": "good",
+            "predicted_class": "bad",
+            "error_count": 32,
+            "error_rate_within_true_class": 0.0578
+          }
+        ],
+        "top_features": [
+          "num_feat_9 (0.169)",
+          "num_feat_5 (0.162)",
+          "num_feat_11 (0.154)",
+          "num_feat_7 (0.144)",
+          "num_feat_6 (0.081)"
+        ],
+        "primary_pathology": "well_balanced_needs_fine_tuning",
+        "diagnostic_summary_text": "Val Macro-F1=0.8818 (±0.0306), Train Macro-F1=1.0000 (Overfit Gap=+0.1182). Worst Class='bad' (F1=0.8344 vs Best=0.9297). Top Confusion: bad->good (47 errors). Primary Pathology: well_balanced_needs_fine_tuning."
+      },
+      "best_val_macro_f1_so_far": 0.89192,
+      "elapsed_seconds": 0.5545,
+      "agent_decision": null,
+      "was_new_best": false
+    },
+    {
+      "trial_index": 6,
+      "strategy_name": "Grid Search",
+      "dataset_name": "credit-g",
+      "seed": 42,
+      "config": {
+        "imputer": "median",
+        "scaler": "standard",
+        "categorical_encoder": "onehot",
+        "feature_engineering": "none",
+        "imbalance_strategy": "none",
+        "threshold_tuning": false,
+        "model_family": "xgboost",
+        "n_estimators": 150,
+        "max_depth": 10,
+        "learning_rate": 0.1,
+        "regularization": 1.0,
+        "subsample": 0.9,
+        "min_samples_leaf": 2
+      },
+      "config_hash": "fc539baa2c64",
+      "diagnostics": {
+        "val_macro_f1": 0.88181,
+        "val_std_f1": 0.03058,
+        "train_macro_f1": 1.0,
+        "overfit_gap": 0.11819,
+        "val_balanced_accuracy": 0.87559,
+        "per_class_f1": {
+          "bad": 0.8344,
+          "good": 0.9297
+        },
+        "worst_class_label": "bad",
+        "worst_class_f1": 0.8344,
+        "best_class_f1": 0.9297,
+        "top_confused_pairs": [
+          {
+            "true_class": "bad",
+            "predicted_class": "good",
+            "error_count": 47,
+            "error_rate_within_true_class": 0.1911
+          },
+          {
+            "true_class": "good",
+            "predicted_class": "bad",
+            "error_count": 32,
+            "error_rate_within_true_class": 0.0578
+          }
+        ],
+        "top_features": [
+          "num_feat_9 (0.169)",
+          "num_feat_5 (0.162)",
+          "num_feat_11 (0.154)",
+          "num_feat_7 (0.144)",
+          "num_feat_6 (0.081)"
+        ],
+        "primary_pathology": "well_balanced_needs_fine_tuning",
+        "diagnostic_summary_text": "Val Macro-F1=0.8818 (±0.0306), Train Macro-F1=1.0000 (Overfit Gap=+0.1182). Worst Class='bad' (F1=0.8344 vs Best=0.9297). Top Confusion: bad->good (47 errors). Primary Pathology: well_balanced_needs_fine_tuning."
+      },
+      "best_val_macro_f1_so_far": 0.89192,
+      "elapsed_seconds": 0.5469,
+      "agent_decision": null,
+      "was_new_best": false
+    },
+    {
+      "trial_index": 7,
+      "strategy_name": "Grid Search",
+      "dataset_name": "credit-g",
+      "seed": 42,
+      "config": {
+        "imputer": "median",
+        "scaler": "none",
+        "categorical_encoder": "ordinal",
+        "feature_engineering": "none",
+        "imbalance_strategy": "none",
+        "threshold_tuning": false,
+        "model_family": "xgboost",
+        "n_estimators": 150,
+        "max_depth": 10,
+        "learning_rate": 0.1,
+        "regularization": 1.0,
+        "subsample": 0.9,
+        "min_samples_leaf": 2
+      },
+      "config_hash": "0dc0bd3a43d6",
+      "diagnostics": {
+        "val_macro_f1": 0.88181,
+        "val_std_f1": 0.03058,
+        "train_macro_f1": 1.0,
+        "overfit_gap": 0.11819,
+        "val_balanced_accuracy": 0.87559,
+        "per_class_f1": {
+          "bad": 0.8344,
+          "good": 0.9297
+        },
+        "worst_class_label": "bad",
+        "worst_class_f1": 0.8344,
+        "best_class_f1": 0.9297,
+        "top_confused_pairs": [
+          {
+            "true_class": "bad",
+            "predicted_class": "good",
+            "error_count": 47,
+            "error_rate_within_true_class": 0.1911
+          },
+          {
+            "true_class": "good",
+            "predicted_class": "bad",
+            "error_count": 32,
+            "error_rate_within_true_class": 0.0578
+          }
+        ],
+        "top_features": [
+          "num_feat_9 (0.169)",
+          "num_feat_5 (0.162)",
+          "num_feat_11 (0.154)",
+          "num_feat_7 (0.144)",
+          "num_feat_6 (0.081)"
+        ],
+        "primary_pathology": "well_balanced_needs_fine_tuning",
+        "diagnostic_summary_text": "Val Macro-F1=0.8818 (±0.0306), Train Macro-F1=1.0000 (Overfit Gap=+0.1182). Worst Class='bad' (F1=0.8344 vs Best=0.9297). Top Confusion: bad->good (47 errors). Primary Pathology: well_balanced_needs_fine_tuning."
+      },
+      "best_val_macro_f1_so_far": 0.89192,
+      "elapsed_seconds": 0.589,
+      "agent_decision": null,
+      "was_new_best": false
+    }
+  ]
+}
