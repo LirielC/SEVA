@@ -130,13 +130,21 @@ with tab_overview:
             f"FE: {ag.best_config.feature_engineering}",
         )
 
-    # Build Convergence DataFrame
+    # Build Convergence DataFrame up to max trial length with forward-fill for alignment
+    all_strats = sorted({r.strategy_name for r in ds_runs})
+    max_len = max((len(r.trials) for r in ds_runs), default=0)
     curve_dict = {}
-    for strat in sorted({r.strategy_name for r in ds_runs}):
+
+    for strat in all_strats:
         s_runs = [r for r in ds_runs if r.strategy_name == strat]
-        min_t = min(len(r.trials) for r in s_runs)
-        mat = np.array([[t.best_val_macro_f1_so_far for t in r.trials[:min_t]] for r in s_runs])
-        curve_dict[strat] = np.mean(mat, axis=0)
+        strat_curves = []
+        for r in s_runs:
+            c = [t.best_val_macro_f1_so_far for t in r.trials]
+            if len(c) < max_len:
+                c = c + [c[-1]] * (max_len - len(c))
+            strat_curves.append(c[:max_len])
+        if strat_curves:
+            curve_dict[strat] = np.mean(strat_curves, axis=0)
 
     df_curves = pd.DataFrame(curve_dict)
     df_curves.index.name = "Trial"
