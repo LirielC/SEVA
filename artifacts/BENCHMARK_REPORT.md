@@ -4,6 +4,14 @@
 
 > **Core Technical Hypothesis:** Does an autonomous agent guided by rich validation error diagnostics (train-val gap, class collapse, confusion matrices) discover superior tabular pipelines with higher sample efficiency and lower regret than blind Random Search and black-box Bayesian Optimization (Optuna TPE)?
 
+### Methodological Definitions & Scientific Scope
+- **Validation Macro-F1:** Arithmetic mean of 5-fold Stratified Cross-Validation on the 80% Development partition. Best Val Macro-F1 reflects the maximum 5-fold CV mean across all trials.
+- **Holdout Test Macro-F1:** Evaluated once on the untouched 20% holdout split using the winning configuration retrained on the full 80% Dev set.
+- **AUC Convergence:** Normalized discrete integral across budget T=6, defined as (1/T) * sum(cumulative_best_val_f1). Normalized to [0.0, 1.0].
+- **Trials to 95% Peak:** The earliest trial index capturing >= 95% of total validation improvement over Trial 0 baseline.
+- **Environment & Seeds:** Evaluated under Python 3.12.10, Scikit-learn 1.9.1, XGBoost 3.4.1, CatBoost 1.2.10, Optuna 5.0.0, and Pydantic 2.14.0 using a single reference seed (seed=42).
+- **Scientific Caveat:** With a single seed and three datasets, these findings represent **promising preliminary empirical evidence** of diagnostic search efficiency rather than a definitive demonstration of universally generalizable superiority.
+
 ### Four-Strategy Ablation Benchmark
 
 | Dataset | Strategy | Baseline F1 | Best Val Macro-F1 (Mean ± Std) | Holdout Test F1 (Mean ± Std) | Trials to 95% Peak | AUC Convergence | LLM Cost ($) | Mean Time (s) |

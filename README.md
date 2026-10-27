@@ -89,10 +89,11 @@ The system was evaluated across three OpenML tabular datasets with distinct stru
 | `vehicle` | Optuna (TPE) | 0.7368 | 0.7734 | 0.7437 | Trial #1 | 0.7673 | N/A | 266.1s |
 | `vehicle` | Random Search | 0.7368 | 0.7625 | 0.7766 | Trial #5 | 0.7481 | N/A | 62.9s |
 
-### Key Observations
+### Key Observations & Scientific Scope
 - **Distinct Trajectories:** SEVA (Heuristic Agent) and SEVA (LLM Agent) exhibit distinct exploration pathways. On `credit-g`, the Heuristic Agent reached peak validation Macro-F1 of **0.7205** at Trial #2 via cost-sensitive balancing, while the LLM Agent achieved the highest Holdout generalization at **0.6858**.
 - **Superiority over Black-Box Solvers:** On `credit-g`, Optuna and Random Search stagnated at 0.6943 and 0.7007 respectively, falling short of both SEVA agents. On `phoneme`, the LLM agent reached **0.8812** on the locked holdout test.
 - **Strict Holdout Air-Gap:** All preprocessing, feature engineering, and class rebalancing transforms are strictly fitted within cross-validation training folds. The holdout test scores faithfully reflect real-world generalization on unseen distributions.
+- **Experimental Scope & Scientific Disclaimer:** The benchmark metrics presented above reflect a single controlled reference seed (`seed=42`) across three OpenML benchmark datasets with a fixed budget of 6 trials. With a single seed and three datasets, these findings constitute **promising preliminary empirical evidence** of diagnostic search efficiency rather than a definitive demonstration of universally generalizable superiority over Bayesian optimization. SEVA includes built-in support for multi-seed evaluations (`--seeds 42 101 202`) and deterministic replay (`seva replay`) to enable multi-seed statistical significance testing (e.g., Wilcoxon signed-rank tests).
 
 <div align="center">
   <img src="artifacts/plots/convergence_curves.png" alt="Convergence Curves by Dataset" width="900px" />
@@ -104,14 +105,39 @@ The system was evaluated across three OpenML tabular datasets with distinct stru
 
 ---
 
-## 5. Evaluation Metrics & Telemetry
+## 5. Evaluation Metrics & Methodological Definitions
 
-- **Macro-Averaged F1 Score (`val_macro_f1`):** Primary optimization target, treating all classes equally to penalize minority-class failure.
-- **Generalization Overfit Gap:** `train_macro_f1 - val_macro_f1`, used as a feedback signal to modulate tree depth, subsampling, and L2 penalties.
-- **Area Under Convergence Curve (`AUC Convergence`):** Cumulative average of the best validation score achieved across trial steps, quantifying sample efficiency and regret.
-- **Sample Efficiency (`trials_to_95pct_peak` / `--target-threshold`):** Number of evaluations required to reach 95% of maximum gain or a pre-defined performance target.
-- **Locked Holdout Test Macro-F1:** Out-of-sample generalization score on strictly isolated test data.
-- **LLM Operational Telemetry:** Tracks `prompt_tokens`, `completion_tokens`, `total_tokens`, call latency, and estimated USD cost per trial.
+### Metric Specifications
+- **Validation Macro-F1 (`Best Val Macro-F1`):** In each trial $t$, 5-Fold Stratified Cross-Validation is executed on the 80% Development partition. The validation score of trial $t$ is the arithmetic mean of the Macro-F1 scores across the 5 validation folds:
+  $$\text{val\_macro\_f1}_t = \frac{1}{5} \sum_{k=1}^5 \text{Macro-F1}_{k, t}$$
+  The `Best Val Macro-F1` reported in the benchmark table represents the highest mean 5-fold CV score achieved across all trials in that search run: $\max_{t} (\text{val\_macro\_f1}_t)$.
+- **Locked Holdout Test Macro-F1:** Evaluated exactly once on the untouched 20% holdout test partition using the single winning pipeline identified by validation cross-validation, retrained on the full 80% Development partition.
+- **AUC Convergence (Normalized Discrete Integral):** Quantifies early sample efficiency and cumulative regret across the search trajectory. Calculated as the normalized average of the cumulative best validation score across all $T$ budget steps:
+  $$\text{AUC-Convergence} = \frac{1}{T} \sum_{t=0}^{T-1} y^*_t, \quad \text{where} \quad y^*_t = \max_{0 \le i \le t} (\text{val\_macro\_f1}_i)$$
+  Because the discrete area under the step-function curve is divided by the evaluation budget $T$, the metric is normalized into $[0.0, 1.0]$ and directly comparable to F1 scores. An agent that discovers high-performing pipelines early accumulates a substantially higher AUC-Convergence than an optimizer discovering solutions late in the budget.
+- **Sample Efficiency (`Trials to 95% Peak` vs. `Trials to Target Threshold`):**
+  - **`Trials to 95% Peak`:** The earliest trial index $t$ that captured at least 95% of the total validation gain achieved over the baseline Trial 0:
+    $$\text{Target} = \text{val\_macro\_f1}_0 + 0.95 \times \left( \max_{i} \text{val\_macro\_f1}_i - \text{val\_macro\_f1}_0 \right)$$
+  - **`Trials to Target Threshold`:** When invoked with `--target-threshold <float>`, measures the earliest trial index $t$ where $y^*_t \ge \text{threshold}$. If the threshold is never reached within the budget, it returns `None`.
+- **Generalization Overfit Gap:** $\Delta_{\text{overfit}} = \text{train\_macro\_f1} - \text{val\_macro\_f1}$, computed across folds and supplied to the agent to diagnose variance pathologies.
+- **LLM Operational Telemetry:** Tracks exact input `prompt_tokens`, generated `completion_tokens`, total tokens, latency, and estimated USD cost per trial based on standard model pricing.
+
+### Execution Parameters, Environment & Reproducibility Logs
+- **Hardware & Software Environment:**
+  - Python: `3.12.10`
+  - Scikit-learn: `1.9.1`
+  - XGBoost: `3.4.1`
+  - CatBoost: `1.2.10`
+  - Optuna: `5.0.0`
+  - Imbalanced-learn: `0.14.1`
+  - Pydantic: `2.14.0`
+- **Reference Seed:** `seed=42` across all data splitters, cross-validation folds, and stochastic baseline samplers.
+- **Per-Trial Artifact Logs:** Every individual trial is serialized to `artifacts/runs/<dataset>__<strategy>__seed<seed>.json`. Each artifact preserves:
+  1. Full declarative `PipelineConfig` parameters (imputer strategy, scaler family, polynomial degree, selector method, classifier hyperparameters).
+  2. Complete diagnostic payloads (train F1, fold-wise val F1, per-class F1, confusion matrix, overfit gap).
+  3. Structured `AgentDecision` (diagnosis, hypothesis, expected outcome, mutation applied).
+  4. Empirical `observed_outcome` and `hypothesis_confirmed` boolean flag.
+  5. Exact execution elapsed runtime and token telemetry.
 
 ---
 
