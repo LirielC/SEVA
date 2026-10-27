@@ -1,3 +1,15 @@
+---
+title: SEVA - Secure Experimentation and Validation Agent
+emoji: 🛡️
+colorFrom: indigo
+colorTo: green
+sdk: streamlit
+sdk_version: "1.31.0"
+app_file: app.py
+pinned: false
+license: mit
+---
+
 # SEVA: Secure Experimentation and Validation Agent
 
 [![CI - Test & Benchmark](https://img.shields.io/badge/CI-Passing-10B981?style=flat&logo=githubactions)](.github/workflows/ci.yml)
