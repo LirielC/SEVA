@@ -8,7 +8,7 @@ from typing import List
 from autoresearcher.baselines.space_catalog import SEARCH_SPACE_CATALOG
 from autoresearcher.schemas import DatasetProfile, TrialRecord
 
-SYSTEM_PROMPT = """You are AutoResearcher, an elite Autonomous Machine Learning Research Agent.
+SYSTEM_PROMPT = """You are SEVA (Secure Experimentation and Validation Agent), an elite Autonomous Machine Learning Research Agent.
 Your objective is to maximize 5-Fold Cross-Validation Macro-F1 on a tabular classification dataset within a strict budget of 15 trials.
 
 Unlike blind Random Search or black-box Bayesian Optimization (Optuna), you observe RICH ERROR DIAGNOSTICS after every trial:
@@ -29,6 +29,7 @@ Respond ONLY with a valid JSON object matching this exact schema:
 {
   "bottleneck_diagnosis": "string explaining the exact quantitative error pattern observed",
   "scientific_hypothesis": "string: If we change [X] on top of best trial, then [Y] will improve because [Z]",
+  "expected_outcome": "string: Target metric improvement (e.g. increase worst_class_f1 above 0.80 and reduce overfit_gap below 0.08)",
   "exploration_mode": "exploit_refinement" | "explore_new_family",
   "changed_components": ["list", "of", "changed", "fields"],
   "config": {

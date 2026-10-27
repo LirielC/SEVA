@@ -1,0 +1,636 @@
+{
+  "strategy_name": "SEVA (Heuristic Agent)",
+  "dataset_name": "vehicle",
+  "seed": 42,
+  "budget": 6,
+  "best_val_macro_f1": 0.89045,
+  "holdout_test_macro_f1": 0.90135,
+  "baseline_val_macro_f1": 0.85365,
+  "improvement_over_baseline": 0.0368,
+  "trials_to_95pct_peak": 2,
+  "trials_to_target_threshold": 2,
+  "auc_convergence": 0.87818,
+  "total_elapsed_seconds": 174.2074,
+  "total_llm_tokens": 0,
+  "total_llm_cost_usd": 0.0,
+  "total_llm_calls": 0,
+  "best_config": {
+    "imputer": "median",
+    "scaler": "none",
+    "categorical_encoder": "onehot",
+    "feature_engineering": "none",
+    "imbalance_strategy": "none",
+    "threshold_tuning": false,
+    "model_family": "catboost",
+    "n_estimators": 250,
+    "max_depth": 6,
+    "learning_rate": 0.08,
+    "regularization": 3.0,
+    "subsample": 0.85,
+    "min_samples_leaf": 1
+  },
+  "trials": [
+    {
+      "trial_index": 0,
+      "strategy_name": "SEVA (Heuristic Agent)",
+      "dataset_name": "vehicle",
+      "seed": 42,
+      "config": {
+        "imputer": "median",
+        "scaler": "none",
+        "categorical_encoder": "onehot",
+        "feature_engineering": "none",
+        "imbalance_strategy": "none",
+        "threshold_tuning": false,
+        "model_family": "random_forest",
+        "n_estimators": 100,
+        "max_depth": 10,
+        "learning_rate": 0.1,
+        "regularization": 1.0,
+        "subsample": 1.0,
+        "min_samples_leaf": 1
+      },
+      "config_hash": "b8f37a49ce80",
+      "diagnostics": {
+        "val_macro_f1": 0.85365,
+        "val_std_f1": 0.03237,
+        "train_macro_f1": 0.99889,
+        "overfit_gap": 0.14524,
+        "val_balanced_accuracy": 0.85364,
+        "per_class_f1": {
+          "bus": 0.8623,
+          "opel": 0.8529,
+          "saab": 0.858,
+          "van": 0.8415
+        },
+        "worst_class_label": "van",
+        "worst_class_f1": 0.8415,
+        "best_class_f1": 0.8623,
+        "top_confused_pairs": [
+          {
+            "true_class": "opel",
+            "predicted_class": "van",
+            "error_count": 15,
+            "error_rate_within_true_class": 0.0882
+          },
+          {
+            "true_class": "saab",
+            "predicted_class": "bus",
+            "error_count": 13,
+            "error_rate_within_true_class": 0.0769
+          },
+          {
+            "true_class": "van",
+            "predicted_class": "opel",
+            "error_count": 11,
+            "error_rate_within_true_class": 0.0643
+          }
+        ],
+        "top_features": [
+          "shape_metric_17 (0.096)",
+          "shape_metric_11 (0.093)",
+          "shape_metric_3 (0.089)",
+          "shape_metric_9 (0.081)",
+          "shape_metric_12 (0.070)"
+        ],
+        "primary_pathology": "severe_overfitting",
+        "diagnostic_summary_text": "Val Macro-F1=0.8537 (±0.0324), Train Macro-F1=0.9989 (Overfit Gap=+0.1452). Worst Class='van' (F1=0.8415 vs Best=0.8623). Top Confusion: opel->van (15 errors). Primary Pathology: severe_overfitting."
+      },
+      "best_val_macro_f1_so_far": 0.85365,
+      "elapsed_seconds": 0.997,
+      "agent_decision": {
+        "bottleneck_diagnosis": "Initial state on 'vehicle' (676 dev rows, 18 numeric & 0 categorical features, imbalance_ratio=1.03). No model metrics collected yet.",
+        "scientific_hypothesis": "Establish a reference anchor using an unregularized RandomForest baseline (depth=10, OneHot encoding, no class balancing) to expose dataset pathologies (overfitting gap, minority class recall, and confused class pairs).",
+        "expected_outcome": "Establish benchmark anchor and compute baseline error distribution across all classes.",
+        "exploration_mode": "baseline",
+        "changed_components": [
+          "baseline_initialization"
+        ],
+        "config": {
+          "imputer": "median",
+          "scaler": "none",
+          "categorical_encoder": "onehot",
+          "feature_engineering": "none",
+          "imbalance_strategy": "none",
+          "threshold_tuning": false,
+          "model_family": "random_forest",
+          "n_estimators": 100,
+          "max_depth": 10,
+          "learning_rate": 0.1,
+          "regularization": 1.0,
+          "subsample": 1.0,
+          "min_samples_leaf": 1
+        },
+        "token_usage": null
+      },
+      "was_new_best": true,
+      "observed_outcome": "Baseline established: Val Macro-F1=0.8537, Overfit Gap=+0.1452, Worst Class F1=0.8415.",
+      "hypothesis_confirmed": true,
+      "token_usage": null
+    },
+    {
+      "trial_index": 1,
+      "strategy_name": "SEVA (Heuristic Agent)",
+      "dataset_name": "vehicle",
+      "seed": 42,
+      "config": {
+        "imputer": "median",
+        "scaler": "none",
+        "categorical_encoder": "onehot",
+        "feature_engineering": "none",
+        "imbalance_strategy": "none",
+        "threshold_tuning": false,
+        "model_family": "random_forest",
+        "n_estimators": 100,
+        "max_depth": 7,
+        "learning_rate": 0.1,
+        "regularization": 6.0,
+        "subsample": 0.8,
+        "min_samples_leaf": 4
+      },
+      "config_hash": "559d98b23b60",
+      "diagnostics": {
+        "val_macro_f1": 0.8449,
+        "val_std_f1": 0.02647,
+        "train_macro_f1": 0.94141,
+        "overfit_gap": 0.09651,
+        "val_balanced_accuracy": 0.84469,
+        "per_class_f1": {
+          "bus": 0.8443,
+          "opel": 0.8487,
+          "saab": 0.8554,
+          "van": 0.8309
+        },
+        "worst_class_label": "van",
+        "worst_class_f1": 0.8309,
+        "best_class_f1": 0.8554,
+        "top_confused_pairs": [
+          {
+            "true_class": "opel",
+            "predicted_class": "van",
+            "error_count": 15,
+            "error_rate_within_true_class": 0.0882
+          },
+          {
+            "true_class": "saab",
+            "predicted_class": "bus",
+            "error_count": 15,
+            "error_rate_within_true_class": 0.0888
+          },
+          {
+            "true_class": "van",
+            "predicted_class": "opel",
+            "error_count": 14,
+            "error_rate_within_true_class": 0.0819
+          }
+        ],
+        "top_features": [
+          "shape_metric_11 (0.110)",
+          "shape_metric_17 (0.106)",
+          "shape_metric_3 (0.099)",
+          "shape_metric_9 (0.087)",
+          "shape_metric_12 (0.070)"
+        ],
+        "primary_pathology": "well_balanced_needs_fine_tuning",
+        "diagnostic_summary_text": "Val Macro-F1=0.8449 (±0.0265), Train Macro-F1=0.9414 (Overfit Gap=+0.0965). Worst Class='van' (F1=0.8309 vs Best=0.8554). Top Confusion: opel->van (15 errors). Primary Pathology: well_balanced_needs_fine_tuning."
+      },
+      "best_val_macro_f1_so_far": 0.85365,
+      "elapsed_seconds": 0.9116,
+      "agent_decision": {
+        "bottleneck_diagnosis": "High variance / overfitting detected in Trial #0: Train Macro-F1=0.9989 vs Val Macro-F1=0.8537 (overfit_gap=+0.1452).",
+        "scientific_hypothesis": "If we constrain tree complexity (`max_depth=7`, `min_samples_leaf=4`), apply stochastic subsampling (`subsample=0.8`), and raise L2 regularization to 6.0, generalization on validation folds will improve.",
+        "expected_outcome": "Reduce overfit_gap from +0.1452 below +0.08 while sustaining or increasing Val Macro-F1.",
+        "exploration_mode": "exploit_refinement",
+        "changed_components": [
+          "max_depth: 10 -> 7",
+          "regularization: 1.0 -> 6.0",
+          "subsample: 1.0 -> 0.8",
+          "min_samples_leaf: 1 -> 4"
+        ],
+        "config": {
+          "imputer": "median",
+          "scaler": "none",
+          "categorical_encoder": "onehot",
+          "feature_engineering": "none",
+          "imbalance_strategy": "none",
+          "threshold_tuning": false,
+          "model_family": "random_forest",
+          "n_estimators": 100,
+          "max_depth": 7,
+          "learning_rate": 0.1,
+          "regularization": 6.0,
+          "subsample": 0.8,
+          "min_samples_leaf": 4
+        },
+        "token_usage": null
+      },
+      "was_new_best": false,
+      "observed_outcome": "REFUTED/SUB-PEAK: Val Macro-F1=0.8449 (-0.0088 vs peak 0.8537), Overfit Gap=+0.0965.",
+      "hypothesis_confirmed": false,
+      "token_usage": null
+    },
+    {
+      "trial_index": 2,
+      "strategy_name": "SEVA (Heuristic Agent)",
+      "dataset_name": "vehicle",
+      "seed": 42,
+      "config": {
+        "imputer": "median",
+        "scaler": "none",
+        "categorical_encoder": "onehot",
+        "feature_engineering": "none",
+        "imbalance_strategy": "none",
+        "threshold_tuning": false,
+        "model_family": "catboost",
+        "n_estimators": 250,
+        "max_depth": 6,
+        "learning_rate": 0.08,
+        "regularization": 3.0,
+        "subsample": 0.85,
+        "min_samples_leaf": 1
+      },
+      "config_hash": "dfac213831c2",
+      "diagnostics": {
+        "val_macro_f1": 0.89045,
+        "val_std_f1": 0.03579,
+        "train_macro_f1": 0.98739,
+        "overfit_gap": 0.09694,
+        "val_balanced_accuracy": 0.8905,
+        "per_class_f1": {
+          "bus": 0.8862,
+          "opel": 0.8994,
+          "saab": 0.8862,
+          "van": 0.8902
+        },
+        "worst_class_label": "bus",
+        "worst_class_f1": 0.8862,
+        "best_class_f1": 0.8994,
+        "top_confused_pairs": [
+          {
+            "true_class": "saab",
+            "predicted_class": "bus",
+            "error_count": 10,
+            "error_rate_within_true_class": 0.0592
+          },
+          {
+            "true_class": "saab",
+            "predicted_class": "van",
+            "error_count": 8,
+            "error_rate_within_true_class": 0.0473
+          },
+          {
+            "true_class": "van",
+            "predicted_class": "opel",
+            "error_count": 8,
+            "error_rate_within_true_class": 0.0468
+          }
+        ],
+        "top_features": [
+          "shape_metric_17 (10.333)",
+          "shape_metric_12 (8.800)",
+          "shape_metric_11 (7.632)",
+          "shape_metric_18 (6.982)",
+          "shape_metric_13 (6.756)"
+        ],
+        "primary_pathology": "well_balanced_needs_fine_tuning",
+        "diagnostic_summary_text": "Val Macro-F1=0.8904 (±0.0358), Train Macro-F1=0.9874 (Overfit Gap=+0.0969). Worst Class='bus' (F1=0.8862 vs Best=0.8994). Top Confusion: saab->bus (10 errors). Primary Pathology: well_balanced_needs_fine_tuning."
+      },
+      "best_val_macro_f1_so_far": 0.89045,
+      "elapsed_seconds": 32.7037,
+      "agent_decision": {
+        "bottleneck_diagnosis": "Current best uses 'random_forest' (Val F1=0.8537), leaving symmetric oblivious trees (`catboost`) unexplored. Top confusion is 'opel' misclassified as 'van' (15 errors, 8.8%).",
+        "scientific_hypothesis": "If we switch to `catboost` (250 iterations, depth=6, lr=0.08, L2=3.0) with `onehot` encoding, symmetric decision tables will reduce variance and better separate overlapping decision boundaries.",
+        "expected_outcome": "Achieve Val Macro-F1 higher than current best (0.8537) with decreased error count on top confused pair.",
+        "exploration_mode": "explore_new_family",
+        "changed_components": [
+          "model_family: random_forest -> catboost",
+          "n_estimators: 100 -> 250",
+          "max_depth: 10 -> 6",
+          "learning_rate: 0.1 -> 0.08",
+          "regularization: 1.0 -> 3.0",
+          "subsample: 1.0 -> 0.85"
+        ],
+        "config": {
+          "imputer": "median",
+          "scaler": "none",
+          "categorical_encoder": "onehot",
+          "feature_engineering": "none",
+          "imbalance_strategy": "none",
+          "threshold_tuning": false,
+          "model_family": "catboost",
+          "n_estimators": 250,
+          "max_depth": 6,
+          "learning_rate": 0.08,
+          "regularization": 3.0,
+          "subsample": 0.85,
+          "min_samples_leaf": 1
+        },
+        "token_usage": null
+      },
+      "was_new_best": true,
+      "observed_outcome": "CONFIRMED: New peak reached. Val Macro-F1=0.8904 (+0.0368 vs prior best), Overfit Gap=+0.0969, Worst Class 'bus' F1=0.8862.",
+      "hypothesis_confirmed": true,
+      "token_usage": null
+    },
+    {
+      "trial_index": 3,
+      "strategy_name": "SEVA (Heuristic Agent)",
+      "dataset_name": "vehicle",
+      "seed": 42,
+      "config": {
+        "imputer": "median",
+        "scaler": "robust",
+        "categorical_encoder": "onehot",
+        "feature_engineering": "ratios_top5",
+        "imbalance_strategy": "none",
+        "threshold_tuning": false,
+        "model_family": "xgboost",
+        "n_estimators": 250,
+        "max_depth": 5,
+        "learning_rate": 0.08,
+        "regularization": 3.0,
+        "subsample": 0.85,
+        "min_samples_leaf": 2
+      },
+      "config_hash": "bc492a6efd15",
+      "diagnostics": {
+        "val_macro_f1": 0.85505,
+        "val_std_f1": 0.03641,
+        "train_macro_f1": 1.0,
+        "overfit_gap": 0.14495,
+        "val_balanced_accuracy": 0.85513,
+        "per_class_f1": {
+          "bus": 0.8649,
+          "opel": 0.8393,
+          "saab": 0.8673,
+          "van": 0.8488
+        },
+        "worst_class_label": "opel",
+        "worst_class_f1": 0.8393,
+        "best_class_f1": 0.8673,
+        "top_confused_pairs": [
+          {
+            "true_class": "van",
+            "predicted_class": "opel",
+            "error_count": 14,
+            "error_rate_within_true_class": 0.0819
+          },
+          {
+            "true_class": "opel",
+            "predicted_class": "van",
+            "error_count": 13,
+            "error_rate_within_true_class": 0.0765
+          },
+          {
+            "true_class": "bus",
+            "predicted_class": "saab",
+            "error_count": 10,
+            "error_rate_within_true_class": 0.0602
+          }
+        ],
+        "top_features": [
+          "engineered_feat_23 (0.051)",
+          "engineered_feat_28 (0.051)",
+          "engineered_feat_18 (0.050)",
+          "engineered_feat_34 (0.047)",
+          "engineered_feat_35 (0.045)"
+        ],
+        "primary_pathology": "severe_overfitting",
+        "diagnostic_summary_text": "Val Macro-F1=0.8550 (±0.0364), Train Macro-F1=1.0000 (Overfit Gap=+0.1449). Worst Class='opel' (F1=0.8393 vs Best=0.8673). Top Confusion: van->opel (14 errors). Primary Pathology: severe_overfitting."
+      },
+      "best_val_macro_f1_so_far": 0.89045,
+      "elapsed_seconds": 5.6099,
+      "agent_decision": {
+        "bottleneck_diagnosis": "Best validation score is 0.8904 with worst class 'bus' (F1=0.8862). Depth-wise gradient boosting (`xgboost`) with engineered interactions has not been tested.",
+        "scientific_hypothesis": "If we test `xgboost` (depth=5, lr=0.08, reg_lambda=3.0) combined with `ratios_top5` feature interactions and `robust` scaling, non-linear boundaries between confused classes will sharpen.",
+        "expected_outcome": "Outperform catboost baseline by at least +0.01 in Macro-F1 via non-linear feature combinations.",
+        "exploration_mode": "explore_new_family",
+        "changed_components": [
+          "scaler: none -> robust",
+          "feature_engineering: none -> ratios_top5",
+          "model_family: catboost -> xgboost",
+          "max_depth: 6 -> 5",
+          "min_samples_leaf: 1 -> 2"
+        ],
+        "config": {
+          "imputer": "median",
+          "scaler": "robust",
+          "categorical_encoder": "onehot",
+          "feature_engineering": "ratios_top5",
+          "imbalance_strategy": "none",
+          "threshold_tuning": false,
+          "model_family": "xgboost",
+          "n_estimators": 250,
+          "max_depth": 5,
+          "learning_rate": 0.08,
+          "regularization": 3.0,
+          "subsample": 0.85,
+          "min_samples_leaf": 2
+        },
+        "token_usage": null
+      },
+      "was_new_best": false,
+      "observed_outcome": "REFUTED/SUB-PEAK: Val Macro-F1=0.8550 (-0.0354 vs peak 0.8904), Overfit Gap=+0.1449.",
+      "hypothesis_confirmed": false,
+      "token_usage": null
+    },
+    {
+      "trial_index": 4,
+      "strategy_name": "SEVA (Heuristic Agent)",
+      "dataset_name": "vehicle",
+      "seed": 42,
+      "config": {
+        "imputer": "median",
+        "scaler": "standard",
+        "categorical_encoder": "onehot",
+        "feature_engineering": "ratios_top5",
+        "imbalance_strategy": "none",
+        "threshold_tuning": false,
+        "model_family": "catboost",
+        "n_estimators": 250,
+        "max_depth": 6,
+        "learning_rate": 0.08,
+        "regularization": 3.0,
+        "subsample": 0.85,
+        "min_samples_leaf": 1
+      },
+      "config_hash": "ffe312500aaa",
+      "diagnostics": {
+        "val_macro_f1": 0.85631,
+        "val_std_f1": 0.03538,
+        "train_macro_f1": 0.98372,
+        "overfit_gap": 0.12741,
+        "val_balanced_accuracy": 0.85644,
+        "per_class_f1": {
+          "bus": 0.8624,
+          "opel": 0.864,
+          "saab": 0.848,
+          "van": 0.8523
+        },
+        "worst_class_label": "saab",
+        "worst_class_f1": 0.848,
+        "best_class_f1": 0.864,
+        "top_confused_pairs": [
+          {
+            "true_class": "opel",
+            "predicted_class": "van",
+            "error_count": 13,
+            "error_rate_within_true_class": 0.0765
+          },
+          {
+            "true_class": "bus",
+            "predicted_class": "saab",
+            "error_count": 11,
+            "error_rate_within_true_class": 0.0663
+          },
+          {
+            "true_class": "van",
+            "predicted_class": "saab",
+            "error_count": 11,
+            "error_rate_within_true_class": 0.0643
+          }
+        ],
+        "top_features": [
+          "shape_metric_18 (6.538)",
+          "shape_metric_12 (6.208)",
+          "shape_metric_14 (5.893)",
+          "shape_metric_4 (5.072)",
+          "shape_metric_16 (5.032)"
+        ],
+        "primary_pathology": "well_balanced_needs_fine_tuning",
+        "diagnostic_summary_text": "Val Macro-F1=0.8563 (±0.0354), Train Macro-F1=0.9837 (Overfit Gap=+0.1274). Worst Class='saab' (F1=0.8480 vs Best=0.8640). Top Confusion: opel->van (13 errors). Primary Pathology: well_balanced_needs_fine_tuning."
+      },
+      "best_val_macro_f1_so_far": 0.89045,
+      "elapsed_seconds": 68.0421,
+      "agent_decision": {
+        "bottleneck_diagnosis": "Representation bottleneck on Trial #2 (Val F1=0.8904, top confusion: 'saab' misclassified as 'bus' (10 errors, 5.9%)).",
+        "scientific_hypothesis": "If we apply `ratios_top5` feature engineering with `standard` scaling while keeping the winning `catboost` backbone, Macro-F1 will improve because: Non-linear ratio and difference interactions among top-5 F-value features capture relative magnitudes between confused classes.",
+        "expected_outcome": "Increase Val Macro-F1 above 0.8904 by reducing representation noise.",
+        "exploration_mode": "exploit_refinement",
+        "changed_components": [
+          "scaler: none -> standard",
+          "feature_engineering: none -> ratios_top5"
+        ],
+        "config": {
+          "imputer": "median",
+          "scaler": "standard",
+          "categorical_encoder": "onehot",
+          "feature_engineering": "ratios_top5",
+          "imbalance_strategy": "none",
+          "threshold_tuning": false,
+          "model_family": "catboost",
+          "n_estimators": 250,
+          "max_depth": 6,
+          "learning_rate": 0.08,
+          "regularization": 3.0,
+          "subsample": 0.85,
+          "min_samples_leaf": 1
+        },
+        "token_usage": null
+      },
+      "was_new_best": false,
+      "observed_outcome": "REFUTED/SUB-PEAK: Val Macro-F1=0.8563 (-0.0341 vs peak 0.8904), Overfit Gap=+0.1274.",
+      "hypothesis_confirmed": false,
+      "token_usage": null
+    },
+    {
+      "trial_index": 5,
+      "strategy_name": "SEVA (Heuristic Agent)",
+      "dataset_name": "vehicle",
+      "seed": 42,
+      "config": {
+        "imputer": "median",
+        "scaler": "robust",
+        "categorical_encoder": "onehot",
+        "feature_engineering": "poly_top5",
+        "imbalance_strategy": "none",
+        "threshold_tuning": false,
+        "model_family": "catboost",
+        "n_estimators": 250,
+        "max_depth": 6,
+        "learning_rate": 0.08,
+        "regularization": 3.0,
+        "subsample": 0.85,
+        "min_samples_leaf": 1
+      },
+      "config_hash": "7b8866239a0e",
+      "diagnostics": {
+        "val_macro_f1": 0.85873,
+        "val_std_f1": 0.02963,
+        "train_macro_f1": 0.98925,
+        "overfit_gap": 0.13052,
+        "val_balanced_accuracy": 0.85816,
+        "per_class_f1": {
+          "bus": 0.8855,
+          "opel": 0.8571,
+          "saab": 0.8521,
+          "van": 0.8382
+        },
+        "worst_class_label": "van",
+        "worst_class_f1": 0.8382,
+        "best_class_f1": 0.8855,
+        "top_confused_pairs": [
+          {
+            "true_class": "opel",
+            "predicted_class": "van",
+            "error_count": 13,
+            "error_rate_within_true_class": 0.0765
+          },
+          {
+            "true_class": "van",
+            "predicted_class": "opel",
+            "error_count": 12,
+            "error_rate_within_true_class": 0.0702
+          },
+          {
+            "true_class": "van",
+            "predicted_class": "saab",
+            "error_count": 12,
+            "error_rate_within_true_class": 0.0702
+          }
+        ],
+        "top_features": [
+          "shape_metric_12 (7.259)",
+          "shape_metric_17 (6.862)",
+          "shape_metric_16 (6.021)",
+          "shape_metric_14 (5.948)",
+          "shape_metric_18 (5.941)"
+        ],
+        "primary_pathology": "well_balanced_needs_fine_tuning",
+        "diagnostic_summary_text": "Val Macro-F1=0.8587 (±0.0296), Train Macro-F1=0.9892 (Overfit Gap=+0.1305). Worst Class='van' (F1=0.8382 vs Best=0.8855). Top Confusion: opel->van (13 errors). Primary Pathology: well_balanced_needs_fine_tuning."
+      },
+      "best_val_macro_f1_so_far": 0.89045,
+      "elapsed_seconds": 59.3646,
+      "agent_decision": {
+        "bottleneck_diagnosis": "Representation bottleneck on Trial #2 (Val F1=0.8904, top confusion: 'saab' misclassified as 'bus' (10 errors, 5.9%)).",
+        "scientific_hypothesis": "If we apply `poly_top5` feature engineering with `robust` scaling while keeping the winning `catboost` backbone, Macro-F1 will improve because: Second-order polynomial terms (`x_i * x_j`, `x_i^2`) on top informative columns increase boundary expressiveness.",
+        "expected_outcome": "Increase Val Macro-F1 above 0.8904 by reducing representation noise.",
+        "exploration_mode": "exploit_refinement",
+        "changed_components": [
+          "scaler: none -> robust",
+          "feature_engineering: none -> poly_top5"
+        ],
+        "config": {
+          "imputer": "median",
+          "scaler": "robust",
+          "categorical_encoder": "onehot",
+          "feature_engineering": "poly_top5",
+          "imbalance_strategy": "none",
+          "threshold_tuning": false,
+          "model_family": "catboost",
+          "n_estimators": 250,
+          "max_depth": 6,
+          "learning_rate": 0.08,
+          "regularization": 3.0,
+          "subsample": 0.85,
+          "min_samples_leaf": 1
+        },
+        "token_usage": null
+      },
+      "was_new_best": false,
+      "observed_outcome": "REFUTED/SUB-PEAK: Val Macro-F1=0.8587 (-0.0317 vs peak 0.8904), Overfit Gap=+0.1305.",
+      "hypothesis_confirmed": false,
+      "token_usage": null
+    }
+  ]
+}

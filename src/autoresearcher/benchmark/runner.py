@@ -1,7 +1,8 @@
-"""Benchmark runner comparing AutoResearcher Agent against Optuna (TPE), Random Search, and Grid Search."""
+"""Benchmark runner comparing SEVA (LLM Agent & Heuristic Agent) against Optuna (TPE) and Random Search."""
 
 from __future__ import annotations
 
+import json
 import time
 from pathlib import Path
 from typing import Callable, List, Optional
@@ -15,13 +16,18 @@ from autoresearcher.baselines.random_search import RandomSearchStrategy
 from autoresearcher.config import DEFAULT_BENCHMARK_DATASETS, SETTINGS
 from autoresearcher.data.openml_loader import DatasetSplit, load_benchmark_dataset
 from autoresearcher.pipeline.evaluator import evaluate_on_holdout, evaluate_pipeline_cv
-from autoresearcher.schemas import AgentDecision, MethodBenchmarkResult, PipelineConfig, TrialRecord
+from autoresearcher.schemas import (
+    AgentDecision,
+    MethodBenchmarkResult,
+    PipelineConfig,
+    TrialRecord,
+)
 from autoresearcher.tracking.mlflow_logger import ExperimentTracker
 from autoresearcher.tracking.plotting import generate_benchmark_plots
 
 
 def _compute_trials_to_95pct_gain(trials: List[TrialRecord]) -> int:
-    """Compute the earliest trial index that achieved >= 95% of the run's total validation gain over Trial 0."""
+    """Compute earliest trial index that achieved >= 95% of total validation gain over Trial 0."""
     if not trials:
         return 0
     base_score = trials[0].diagnostics.val_macro_f1
@@ -36,12 +42,21 @@ def _compute_trials_to_95pct_gain(trials: List[TrialRecord]) -> int:
     return trials[-1].trial_index
 
 
+def _compute_trials_to_fixed_threshold(trials: List[TrialRecord], threshold: float) -> Optional[int]:
+    """Compute earliest trial index achieving a pre-defined absolute Macro-F1 threshold."""
+    for t in trials:
+        if t.best_val_macro_f1_so_far >= threshold - 1e-6:
+            return t.trial_index
+    return None
+
+
 def run_single_strategy(
     strategy_type: str,
     dataset: DatasetSplit,
     budget: int = 15,
     seed: int = 42,
     n_splits: int = 5,
+    target_threshold: Optional[float] = None,
     tracker: Optional[ExperimentTracker] = None,
     progress_callback: Optional[Callable[[TrialRecord], None]] = None,
 ) -> MethodBenchmarkResult:
@@ -49,9 +64,12 @@ def run_single_strategy(
     start_total = time.perf_counter()
     n_classes = dataset.profile.n_classes
 
-    if strategy_type == "agent":
-        agent = AutoResearcherAgent(profile=dataset.profile, budget=budget, seed=seed)
-        strategy_name = AutoResearcherAgent.name
+    if strategy_type in ("llm_agent", "agent_llm"):
+        agent = AutoResearcherAgent(profile=dataset.profile, budget=budget, seed=seed, mode="llm")
+        strategy_name = agent.name
+    elif strategy_type in ("heuristic_agent", "agent", "agent_heuristic"):
+        agent = AutoResearcherAgent(profile=dataset.profile, budget=budget, seed=seed, mode="heuristic")
+        strategy_name = agent.name
     elif strategy_type == "optuna":
         optuna_strat = OptunaTPEStrategy(seed=seed, n_classes=n_classes)
         strategy_name = OptunaTPEStrategy.name
@@ -68,10 +86,20 @@ def run_single_strategy(
     best_val_so_far: float = -1.0
     best_config: PipelineConfig = PipelineConfig.default_baseline()
 
+    tot_tokens = 0
+    tot_cost = 0.0
+    tot_calls = 0
+
     for trial_idx in range(budget):
         decision: Optional[AgentDecision] = None
-        if strategy_type == "agent":
+        prior_best = best_val_so_far
+
+        if strategy_type in ("llm_agent", "agent_llm", "heuristic_agent", "agent", "agent_heuristic"):
             cfg, decision = agent.suggest_next(history)
+            if decision and decision.token_usage:
+                tot_tokens += decision.token_usage.total_tokens
+                tot_cost += decision.token_usage.estimated_cost_usd
+                tot_calls += 1
         elif strategy_type == "optuna":
             cfg = optuna_strat.suggest_next(history)
         elif strategy_type == "random":
@@ -91,6 +119,31 @@ def run_single_strategy(
             best_val_so_far = diag.val_macro_f1
             best_config = cfg
 
+        # Evaluate hypothesis confirmation and formulate observed outcome
+        observed_outcome: Optional[str] = None
+        hypothesis_confirmed: Optional[bool] = None
+
+        if decision is not None:
+            delta_val = round(diag.val_macro_f1 - prior_best, 4) if prior_best > 0 else 0.0
+            if trial_idx == 0:
+                observed_outcome = (
+                    f"Baseline established: Val Macro-F1={diag.val_macro_f1:.4f}, "
+                    f"Overfit Gap={diag.overfit_gap:+.4f}, Worst Class F1={diag.worst_class_f1:.4f}."
+                )
+                hypothesis_confirmed = True
+            elif was_new_best:
+                observed_outcome = (
+                    f"CONFIRMED: New peak reached. Val Macro-F1={diag.val_macro_f1:.4f} ({delta_val:+.4f} vs prior best), "
+                    f"Overfit Gap={diag.overfit_gap:+.4f}, Worst Class '{diag.worst_class_label}' F1={diag.worst_class_f1:.4f}."
+                )
+                hypothesis_confirmed = True
+            else:
+                observed_outcome = (
+                    f"REFUTED/SUB-PEAK: Val Macro-F1={diag.val_macro_f1:.4f} ({delta_val:+.4f} vs peak {prior_best:.4f}), "
+                    f"Overfit Gap={diag.overfit_gap:+.4f}."
+                )
+                hypothesis_confirmed = False
+
         record = TrialRecord(
             trial_index=trial_idx,
             strategy_name=strategy_name,
@@ -103,6 +156,9 @@ def run_single_strategy(
             elapsed_seconds=elapsed,
             agent_decision=decision,
             was_new_best=was_new_best,
+            observed_outcome=observed_outcome,
+            hypothesis_confirmed=hypothesis_confirmed,
+            token_usage=decision.token_usage if decision else None,
         )
         history.append(record)
         if progress_callback is not None:
@@ -113,6 +169,12 @@ def run_single_strategy(
     baseline_f1 = history[0].diagnostics.val_macro_f1
     improvement = round(best_val_so_far - baseline_f1, 5)
     trials_to_95 = _compute_trials_to_95pct_gain(history)
+    trials_to_thresh = (
+        _compute_trials_to_fixed_threshold(history, target_threshold)
+        if target_threshold is not None
+        else trials_to_95
+    )
+    auc_conv = round(float(np.mean([t.best_val_macro_f1_so_far for t in history])), 5)
     total_elapsed = round(time.perf_counter() - start_total, 4)
 
     result = MethodBenchmarkResult(
@@ -125,7 +187,12 @@ def run_single_strategy(
         baseline_val_macro_f1=baseline_f1,
         improvement_over_baseline=improvement,
         trials_to_95pct_peak=trials_to_95,
+        trials_to_target_threshold=trials_to_thresh,
+        auc_convergence=auc_conv,
         total_elapsed_seconds=total_elapsed,
+        total_llm_tokens=tot_tokens,
+        total_llm_cost_usd=round(tot_cost, 6),
+        total_llm_calls=tot_calls,
         best_config=best_config,
         trials=history,
     )
@@ -134,6 +201,43 @@ def run_single_strategy(
         tracker.log_method_run(result)
 
     return result
+
+
+def replay_pipeline_from_config(
+    config_source: str | Path | dict,
+    dataset_name: str,
+    seed: int = 42,
+    n_splits: int = 5,
+    prefer_offline_fallback: bool = False,
+) -> dict:
+    """Reproduce any pipeline run deterministically from its seed and exported JSON configuration."""
+    if isinstance(config_source, (str, Path)):
+        p = Path(config_source)
+        if p.exists():
+            raw = json.loads(p.read_text(encoding="utf-8"))
+            cfg_dict = raw.get("best_config", raw.get("config", raw))
+        else:
+            cfg_dict = json.loads(str(config_source))
+    else:
+        cfg_dict = config_source
+
+    config = PipelineConfig.model_validate(cfg_dict)
+    ds = load_benchmark_dataset(dataset_name, split_seed=seed, prefer_offline_fallback=prefer_offline_fallback)
+
+    diag, elapsed = evaluate_pipeline_cv(config=config, dataset=ds, n_splits=n_splits, seed=seed)
+    holdout_f1 = evaluate_on_holdout(config=config, dataset=ds, seed=seed)
+
+    return {
+        "dataset": dataset_name,
+        "seed": seed,
+        "config_hash": config.config_hash(),
+        "cv_val_macro_f1": diag.val_macro_f1,
+        "cv_overfit_gap": diag.overfit_gap,
+        "cv_worst_class_f1": diag.worst_class_f1,
+        "holdout_test_macro_f1": holdout_f1,
+        "elapsed_seconds": elapsed,
+        "config": config.model_dump(),
+    }
 
 
 def generate_markdown_report(
@@ -145,8 +249,6 @@ def generate_markdown_report(
 
     rows = []
     for r in results:
-        # Compute Area Under Convergence Curve (mean best-so-far across budget)
-        auc_conv = float(np.mean([t.best_val_macro_f1_so_far for t in r.trials]))
         rows.append({
             "Dataset": r.dataset_name,
             "Strategy": r.strategy_name,
@@ -156,7 +258,8 @@ def generate_markdown_report(
             "Gain (+F1)": r.improvement_over_baseline,
             "Holdout Test F1": r.holdout_test_macro_f1,
             "Trials to 95% Gain": r.trials_to_95pct_peak,
-            "Mean Best-So-Far (AUC)": round(auc_conv, 4),
+            "AUC Convergence": r.auc_convergence,
+            "LLM Cost ($)": r.total_llm_cost_usd,
             "Time (s)": r.total_elapsed_seconds,
         })
 
@@ -171,7 +274,8 @@ def generate_markdown_report(
             Holdout_F1_Mean=("Holdout Test F1", "mean"),
             Holdout_F1_Std=("Holdout Test F1", "std"),
             Trials_to_95pct=("Trials to 95% Gain", "mean"),
-            Convergence_AUC=("Mean Best-So-Far (AUC)", "mean"),
+            AUC_Conv=("AUC Convergence", "mean"),
+            Cost_USD=("LLM Cost ($)", "mean"),
             Time_s=("Time (s)", "mean"),
         )
         .reset_index()
@@ -180,49 +284,55 @@ def generate_markdown_report(
     agg["Holdout_F1_Std"] = agg["Holdout_F1_Std"].fillna(0.0)
 
     lines = [
-        "# AutoResearcher — Scientific Benchmark Report",
+        "# SEVA — Scientific Benchmark Report",
         "",
         "## 1. Executive Summary & Hypothesis Verification",
         "",
-        "> **Technical Hypothesis:** Does an autonomous ML agent that selects its next experiment based on rich validation error diagnostics (train-val overfitting gap, per-class F1 breakdown, confusion matrix pairs) discover higher-performing models in fewer trials than Random Search, Grid Search, and black-box Bayesian Optimization (Optuna TPE)?",
+        "> **Core Technical Hypothesis:** Does an autonomous agent guided by rich validation error diagnostics (train-val gap, class collapse, confusion matrices) discover superior tabular pipelines with higher sample efficiency and lower regret than blind Random Search and black-box Bayesian Optimization (Optuna TPE)?",
         "",
-        "### Quantitative Comparison by Dataset",
+        "### Four-Strategy Ablation Benchmark",
         "",
-        "| Dataset | Strategy | Baseline F1 | Best Val Macro-F1 (Mean ± Std) | Gain over Baseline | Locked Holdout Test F1 | Trials to 95% Peak | Convergence AUC | Mean Time (s) |",
+        "| Dataset | Strategy | Baseline F1 | Best Val Macro-F1 (Mean ± Std) | Holdout Test F1 (Mean ± Std) | Trials to 95% Peak | AUC Convergence | LLM Cost ($) | Mean Time (s) |",
         "| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |",
     ]
 
     for _, row in agg.iterrows():
-        is_agent = "AutoResearcher" in str(row["Strategy"])
+        is_agent = "SEVA" in str(row["Strategy"]) or "Agent" in str(row["Strategy"])
         strat_fmt = f"**{row['Strategy']}**" if is_agent else str(row["Strategy"])
+        cost_str = f"${row['Cost_USD']:.4f}" if row['Cost_USD'] > 0 else "N/A"
         lines.append(
             f"| `{row['Dataset']}` | {strat_fmt} | {row['Baseline_F1']:.4f} | "
             f"**{row['Val_F1_Mean']:.4f}** ± {row['Val_F1_Std']:.4f} | "
-            f"+{row['Gain_Mean']:.4f} | **{row['Holdout_F1_Mean']:.4f}** ± {row['Holdout_F1_Std']:.4f} | "
-            f"{row['Trials_to_95pct']:.1f} | {row['Convergence_AUC']:.4f} | {row['Time_s']:.1f}s |"
+            f"**{row['Holdout_F1_Mean']:.4f}** ± {row['Holdout_F1_Std']:.4f} | "
+            f"{row['Trials_to_95pct']:.1f} | {row['AUC_Conv']:.4f} | {cost_str} | {row['Time_s']:.1f}s |"
         )
 
     lines.extend([
         "",
         "---",
         "",
-        "## 2. Sample Agent Scientific Lab Notebook (Key Breakthrough Decisions)",
+        "## 2. Scientific Lab Notebook (Diagnosis -> Hypothesis -> Intervention -> Observed Outcome)",
         "",
     ])
 
-    agent_runs = [r for r in results if "AutoResearcher" in r.strategy_name]
+    agent_runs = [r for r in results if "Agent" in r.strategy_name or "SEVA" in r.strategy_name]
     for ar in agent_runs:
-        lines.append(f"### Dataset: `{ar.dataset_name}` (Best Val F1: `{ar.best_val_macro_f1:.4f}` | Holdout F1: `{ar.holdout_test_macro_f1:.4f}`)")
+        lines.append(f"### Strategy: `{ar.strategy_name}` on Dataset `{ar.dataset_name}` (Seed {ar.seed})")
+        lines.append(f"- **Final Performance:** CV Val Macro-F1 = `{ar.best_val_macro_f1:.4f}` | Locked Holdout F1 = `{ar.holdout_test_macro_f1:.4f}`")
+        lines.append(f"- **Efficiency:** Peak at Trial `#{ar.trials_to_95pct_peak}` | AUC Convergence = `{ar.auc_convergence:.4f}` | Time = `{ar.total_elapsed_seconds:.1f}s`")
         lines.append("")
         for t in ar.trials:
             if t.was_new_best and t.agent_decision is not None:
                 lines.append(
-                    f"- **Trial #{t.trial_index}** (`Val Macro-F1 = {t.diagnostics.val_macro_f1:.4f}`, "
+                    f"- **Trial #{t.trial_index}** (`Val F1 = {t.diagnostics.val_macro_f1:.4f}`, "
                     f"`Overfit Gap = {t.diagnostics.overfit_gap:+.4f}`, `Model = {t.config.model_family}`):"
                 )
                 lines.append(f"  - *Diagnosis:* {t.agent_decision.bottleneck_diagnosis}")
                 lines.append(f"  - *Hypothesis:* {t.agent_decision.scientific_hypothesis}")
-                lines.append(f"  - *Changes Applied:* `{', '.join(t.agent_decision.changed_components)}`")
+                lines.append(f"  - *Expected Outcome:* {t.agent_decision.expected_outcome}")
+                lines.append(f"  - *Mutations Applied:* `{', '.join(t.agent_decision.changed_components)}`")
+                if t.observed_outcome:
+                    lines.append(f"  - *Observed Outcome:* {t.observed_outcome}")
         lines.append("")
 
     report_content = "\n".join(lines)
@@ -236,9 +346,10 @@ def run_full_benchmark(
     stochastic_seeds: Optional[List[int]] = None,
     n_splits: int = 5,
     prefer_offline_fallback: bool = False,
+    include_llm_agent: bool = True,
     artifacts_dir: Optional[Path] = None,
 ) -> List[MethodBenchmarkResult]:
-    """Run the complete multi-seed benchmark across datasets and generate plots + Markdown report."""
+    """Run the 4-way ablation benchmark (Random, Optuna, Heuristic Agent, LLM Agent) across seeds."""
     target_datasets = datasets or DEFAULT_BENCHMARK_DATASETS
     seeds = stochastic_seeds or [42, 101, 202]
     out_dir = Path(artifacts_dir or SETTINGS.artifacts_dir)
@@ -261,24 +372,42 @@ def run_full_benchmark(
             f"{ds_split.profile.n_classes} classes, Imbalance={ds_split.profile.imbalance_ratio}x"
         )
 
-        # 1. AutoResearcher Agent
-        print(f"-> Running AutoResearcher (Agent) [budget={budget}]...")
-        res_agent = run_single_strategy(
-            strategy_type="agent",
-            dataset=ds_split,
-            budget=budget,
-            seed=seeds[0],
-            n_splits=n_splits,
-            tracker=tracker,
-        )
-        all_results.append(res_agent)
-        print(
-            f"   [Agent] Best Val F1: {res_agent.best_val_macro_f1:.4f} "
-            f"(+{res_agent.improvement_over_baseline:.4f}) | Holdout F1: {res_agent.holdout_test_macro_f1:.4f} "
-            f"| 95% Peak at Trial #{res_agent.trials_to_95pct_peak}"
-        )
+        # 1. SEVA Heuristic Diagnostic Agent
+        for s in seeds:
+            print(f"-> Running SEVA (Heuristic Agent) [seed={s}, budget={budget}]...")
+            res_heur = run_single_strategy(
+                strategy_type="heuristic_agent",
+                dataset=ds_split,
+                budget=budget,
+                seed=s,
+                n_splits=n_splits,
+                tracker=tracker,
+            )
+            all_results.append(res_heur)
+            print(
+                f"   [Heuristic Agent seed={s}] Best Val F1: {res_heur.best_val_macro_f1:.4f} "
+                f"| Holdout F1: {res_heur.holdout_test_macro_f1:.4f} | 95% Peak: Trial #{res_heur.trials_to_95pct_peak}"
+            )
 
-        # 2. Optuna (TPE) across seeds
+        # 2. SEVA LLM Agent (if requested and configured)
+        if include_llm_agent:
+            for s in seeds:
+                print(f"-> Running SEVA (LLM Agent) [seed={s}, budget={budget}]...")
+                res_llm = run_single_strategy(
+                    strategy_type="llm_agent",
+                    dataset=ds_split,
+                    budget=budget,
+                    seed=s,
+                    n_splits=n_splits,
+                    tracker=tracker,
+                )
+                all_results.append(res_llm)
+                print(
+                    f"   [LLM Agent seed={s}] Best Val F1: {res_llm.best_val_macro_f1:.4f} "
+                    f"| Holdout F1: {res_llm.holdout_test_macro_f1:.4f} | Cost: ${res_llm.total_llm_cost_usd:.4f}"
+                )
+
+        # 3. Optuna (TPE)
         for s in seeds:
             print(f"-> Running Optuna (TPE) [seed={s}, budget={budget}]...")
             res_opt = run_single_strategy(
@@ -295,7 +424,7 @@ def run_full_benchmark(
                 f"| Holdout F1: {res_opt.holdout_test_macro_f1:.4f}"
             )
 
-        # 3. Random Search across seeds
+        # 4. Uniform Random Search
         for s in seeds:
             print(f"-> Running Random Search [seed={s}, budget={budget}]...")
             res_rnd = run_single_strategy(
@@ -311,22 +440,6 @@ def run_full_benchmark(
                 f"   [Random seed={s}] Best Val F1: {res_rnd.best_val_macro_f1:.4f} "
                 f"| Holdout F1: {res_rnd.holdout_test_macro_f1:.4f}"
             )
-
-        # 4. Deterministic Grid Search
-        print(f"-> Running Grid Search [budget={budget}]...")
-        res_grid = run_single_strategy(
-            strategy_type="grid",
-            dataset=ds_split,
-            budget=budget,
-            seed=seeds[0],
-            n_splits=n_splits,
-            tracker=tracker,
-        )
-        all_results.append(res_grid)
-        print(
-            f"   [Grid] Best Val F1: {res_grid.best_val_macro_f1:.4f} "
-            f"| Holdout F1: {res_grid.holdout_test_macro_f1:.4f}"
-        )
 
     plots_dir = out_dir / "plots"
     generate_benchmark_plots(all_results, output_dir=plots_dir)

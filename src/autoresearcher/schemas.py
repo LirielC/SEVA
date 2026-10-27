@@ -184,14 +184,28 @@ class DiagnosticReport(BaseModel):
     diagnostic_summary_text: str
 
 
+class TokenUsage(BaseModel):
+    """Telemetry tracking LLM consumption and operational cost per decision."""
+
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    total_tokens: int = 0
+    estimated_cost_usd: float = 0.0
+    call_latency_ms: float = 0.0
+
+
 class AgentDecision(BaseModel):
-    """Structured scientific reasoning emitted by the AutoResearcher Agent before each trial."""
+    """Structured scientific reasoning emitted by SEVA before executing each trial."""
 
     bottleneck_diagnosis: str = Field(
         description="Diagnosis of main error pattern from CV metrics, train-val gap, and confusion matrix"
     )
     scientific_hypothesis: str = Field(
         description="Falsifiable hypothesis: If we change X, metric Y will improve because Z"
+    )
+    expected_outcome: str = Field(
+        default="Improvement in validation Macro-F1 with mitigated bottleneck pathology",
+        description="Explicit testable outcome expected before executing the trial",
     )
     exploration_mode: ExplorationModeType = Field(
         default="exploit_refinement",
@@ -202,6 +216,7 @@ class AgentDecision(BaseModel):
         description="Explicit list of pipeline dimensions modified",
     )
     config: PipelineConfig
+    token_usage: Optional[TokenUsage] = None
 
 
 class TrialRecord(BaseModel):
@@ -218,6 +233,9 @@ class TrialRecord(BaseModel):
     elapsed_seconds: float
     agent_decision: Optional[AgentDecision] = None
     was_new_best: bool = False
+    observed_outcome: Optional[str] = None
+    hypothesis_confirmed: Optional[bool] = None
+    token_usage: Optional[TokenUsage] = None
 
 
 class MethodBenchmarkResult(BaseModel):
@@ -232,6 +250,11 @@ class MethodBenchmarkResult(BaseModel):
     baseline_val_macro_f1: float
     improvement_over_baseline: float
     trials_to_95pct_peak: int
+    trials_to_target_threshold: Optional[int] = None
+    auc_convergence: float = 0.0
     total_elapsed_seconds: float
+    total_llm_tokens: int = 0
+    total_llm_cost_usd: float = 0.0
+    total_llm_calls: int = 0
     best_config: PipelineConfig
     trials: List[TrialRecord]

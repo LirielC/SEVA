@@ -13,6 +13,8 @@ import pandas as pd
 from autoresearcher.schemas import MethodBenchmarkResult
 
 STRATEGY_COLORS: Dict[str, str] = {
+    "SEVA (LLM Agent)": "#8B5CF6",        # Vibrant Violet
+    "SEVA (Heuristic Agent)": "#10B981",  # Emerald Green
     "AutoResearcher (Agent)": "#10B981",  # Emerald Green
     "Optuna (TPE)": "#3B82F6",            # Royal Blue
     "Random Search": "#F59E0B",           # Amber

@@ -2,13 +2,18 @@
   "strategy_name": "Random Search",
   "dataset_name": "vehicle",
   "seed": 42,
-  "budget": 8,
+  "budget": 6,
   "best_val_macro_f1": 0.85365,
   "holdout_test_macro_f1": 0.86567,
   "baseline_val_macro_f1": 0.85365,
   "improvement_over_baseline": 0.0,
   "trials_to_95pct_peak": 0,
-  "total_elapsed_seconds": 121.8697,
+  "trials_to_target_threshold": 0,
+  "auc_convergence": 0.85365,
+  "total_elapsed_seconds": 121.1515,
+  "total_llm_tokens": 0,
+  "total_llm_cost_usd": 0.0,
+  "total_llm_calls": 0,
   "best_config": {
     "imputer": "median",
     "scaler": "none",
@@ -92,9 +97,12 @@
         "diagnostic_summary_text": "Val Macro-F1=0.8537 (±0.0324), Train Macro-F1=0.9989 (Overfit Gap=+0.1452). Worst Class='van' (F1=0.8415 vs Best=0.8623). Top Confusion: opel->van (15 errors). Primary Pathology: severe_overfitting."
       },
       "best_val_macro_f1_so_far": 0.85365,
-      "elapsed_seconds": 1.0017,
+      "elapsed_seconds": 1.1443,
       "agent_decision": null,
-      "was_new_best": true
+      "was_new_best": true,
+      "observed_outcome": null,
+      "hypothesis_confirmed": null,
+      "token_usage": null
     },
     {
       "trial_index": 1,
@@ -163,9 +171,12 @@
         "diagnostic_summary_text": "Val Macro-F1=0.8318 (±0.0380), Train Macro-F1=0.9956 (Overfit Gap=+0.1638). Worst Class='van' (F1=0.8114 vs Best=0.8520). Top Confusion: opel->van (17 errors). Primary Pathology: severe_overfitting."
       },
       "best_val_macro_f1_so_far": 0.85365,
-      "elapsed_seconds": 95.3786,
+      "elapsed_seconds": 99.6907,
       "agent_decision": null,
-      "was_new_best": false
+      "was_new_best": false,
+      "observed_outcome": null,
+      "hypothesis_confirmed": null,
+      "token_usage": null
     },
     {
       "trial_index": 2,
@@ -234,9 +245,12 @@
         "diagnostic_summary_text": "Val Macro-F1=0.7990 (±0.0442), Train Macro-F1=0.8739 (Overfit Gap=+0.0749). Worst Class='van' (F1=0.7775 vs Best=0.8182). Top Confusion: opel->van (21 errors). Primary Pathology: well_balanced_needs_fine_tuning."
       },
       "best_val_macro_f1_so_far": 0.85365,
-      "elapsed_seconds": 2.585,
+      "elapsed_seconds": 2.8475,
       "agent_decision": null,
-      "was_new_best": false
+      "was_new_best": false,
+      "observed_outcome": null,
+      "hypothesis_confirmed": null,
+      "token_usage": null
     },
     {
       "trial_index": 3,
@@ -305,9 +319,12 @@
         "diagnostic_summary_text": "Val Macro-F1=0.8402 (±0.0278), Train Macro-F1=0.9734 (Overfit Gap=+0.1331). Worst Class='van' (F1=0.8184 vs Best=0.8659). Top Confusion: opel->van (17 errors). Primary Pathology: well_balanced_needs_fine_tuning."
       },
       "best_val_macro_f1_so_far": 0.85365,
-      "elapsed_seconds": 2.3762,
+      "elapsed_seconds": 2.6715,
       "agent_decision": null,
-      "was_new_best": false
+      "was_new_best": false,
+      "observed_outcome": null,
+      "hypothesis_confirmed": null,
+      "token_usage": null
     },
     {
       "trial_index": 4,
@@ -376,9 +393,12 @@
         "diagnostic_summary_text": "Val Macro-F1=0.8329 (±0.0412), Train Macro-F1=0.9041 (Overfit Gap=+0.0713). Worst Class='van' (F1=0.8150 vs Best=0.8476). Top Confusion: van->opel (16 errors). Primary Pathology: well_balanced_needs_fine_tuning."
       },
       "best_val_macro_f1_so_far": 0.85365,
-      "elapsed_seconds": 13.2129,
+      "elapsed_seconds": 13.407,
       "agent_decision": null,
-      "was_new_best": false
+      "was_new_best": false,
+      "observed_outcome": null,
+      "hypothesis_confirmed": null,
+      "token_usage": null
     },
     {
       "trial_index": 5,
@@ -447,151 +467,12 @@
         "diagnostic_summary_text": "Val Macro-F1=0.8485 (±0.0282), Train Macro-F1=0.9807 (Overfit Gap=+0.1322). Worst Class='opel' (F1=0.8378 vs Best=0.8646). Top Confusion: van->opel (16 errors). Primary Pathology: well_balanced_needs_fine_tuning."
       },
       "best_val_macro_f1_so_far": 0.85365,
-      "elapsed_seconds": 1.1863,
+      "elapsed_seconds": 1.1948,
       "agent_decision": null,
-      "was_new_best": false
-    },
-    {
-      "trial_index": 6,
-      "strategy_name": "Random Search",
-      "dataset_name": "vehicle",
-      "seed": 42,
-      "config": {
-        "imputer": "mean",
-        "scaler": "robust",
-        "categorical_encoder": "ordinal",
-        "feature_engineering": "tree_importance_k75",
-        "imbalance_strategy": "class_weight_balanced",
-        "threshold_tuning": false,
-        "model_family": "random_forest",
-        "n_estimators": 350,
-        "max_depth": 5,
-        "learning_rate": 0.03,
-        "regularization": 1.0,
-        "subsample": 1.0,
-        "min_samples_leaf": 1
-      },
-      "config_hash": "6c43758cba2e",
-      "diagnostics": {
-        "val_macro_f1": 0.8226,
-        "val_std_f1": 0.02886,
-        "train_macro_f1": 0.93,
-        "overfit_gap": 0.1074,
-        "val_balanced_accuracy": 0.82254,
-        "per_class_f1": {
-          "bus": 0.8323,
-          "opel": 0.8338,
-          "saab": 0.8228,
-          "van": 0.8023
-        },
-        "worst_class_label": "van",
-        "worst_class_f1": 0.8023,
-        "best_class_f1": 0.8338,
-        "top_confused_pairs": [
-          {
-            "true_class": "opel",
-            "predicted_class": "van",
-            "error_count": 19,
-            "error_rate_within_true_class": 0.1118
-          },
-          {
-            "true_class": "saab",
-            "predicted_class": "bus",
-            "error_count": 16,
-            "error_rate_within_true_class": 0.0947
-          },
-          {
-            "true_class": "van",
-            "predicted_class": "opel",
-            "error_count": 13,
-            "error_rate_within_true_class": 0.076
-          }
-        ],
-        "top_features": [
-          "shape_metric_13 (0.114)",
-          "shape_metric_3 (0.114)",
-          "shape_metric_7 (0.105)",
-          "shape_metric_8 (0.097)",
-          "shape_metric_6 (0.084)"
-        ],
-        "primary_pathology": "well_balanced_needs_fine_tuning",
-        "diagnostic_summary_text": "Val Macro-F1=0.8226 (±0.0289), Train Macro-F1=0.9300 (Overfit Gap=+0.1074). Worst Class='van' (F1=0.8023 vs Best=0.8338). Top Confusion: opel->van (19 errors). Primary Pathology: well_balanced_needs_fine_tuning."
-      },
-      "best_val_macro_f1_so_far": 0.85365,
-      "elapsed_seconds": 3.8956,
-      "agent_decision": null,
-      "was_new_best": false
-    },
-    {
-      "trial_index": 7,
-      "strategy_name": "Random Search",
-      "dataset_name": "vehicle",
-      "seed": 42,
-      "config": {
-        "imputer": "median",
-        "scaler": "none",
-        "categorical_encoder": "target_smooth",
-        "feature_engineering": "ratios_top5",
-        "imbalance_strategy": "class_weight_balanced",
-        "threshold_tuning": false,
-        "model_family": "random_forest",
-        "n_estimators": 180,
-        "max_depth": 8,
-        "learning_rate": 0.2,
-        "regularization": 1.0,
-        "subsample": 0.7,
-        "min_samples_leaf": 12
-      },
-      "config_hash": "769f33e1d366",
-      "diagnostics": {
-        "val_macro_f1": 0.76824,
-        "val_std_f1": 0.03917,
-        "train_macro_f1": 0.84027,
-        "overfit_gap": 0.07203,
-        "val_balanced_accuracy": 0.76773,
-        "per_class_f1": {
-          "bus": 0.7951,
-          "opel": 0.7669,
-          "saab": 0.774,
-          "van": 0.7394
-        },
-        "worst_class_label": "van",
-        "worst_class_f1": 0.7394,
-        "best_class_f1": 0.7951,
-        "top_confused_pairs": [
-          {
-            "true_class": "opel",
-            "predicted_class": "van",
-            "error_count": 30,
-            "error_rate_within_true_class": 0.1765
-          },
-          {
-            "true_class": "saab",
-            "predicted_class": "van",
-            "error_count": 19,
-            "error_rate_within_true_class": 0.1124
-          },
-          {
-            "true_class": "bus",
-            "predicted_class": "van",
-            "error_count": 17,
-            "error_rate_within_true_class": 0.1024
-          }
-        ],
-        "top_features": [
-          "engineered_feat_21 (0.050)",
-          "engineered_feat_33 (0.044)",
-          "engineered_feat_35 (0.044)",
-          "shape_metric_17 (0.043)",
-          "shape_metric_3 (0.041)"
-        ],
-        "primary_pathology": "well_balanced_needs_fine_tuning",
-        "diagnostic_summary_text": "Val Macro-F1=0.7682 (±0.0392), Train Macro-F1=0.8403 (Overfit Gap=+0.0720). Worst Class='van' (F1=0.7394 vs Best=0.7951). Top Confusion: opel->van (30 errors). Primary Pathology: well_balanced_needs_fine_tuning."
-      },
-      "best_val_macro_f1_so_far": 0.85365,
-      "elapsed_seconds": 2.032,
-      "agent_decision": null,
-      "was_new_best": false
+      "was_new_best": false,
+      "observed_outcome": null,
+      "hypothesis_confirmed": null,
+      "token_usage": null
     }
   ]
 }

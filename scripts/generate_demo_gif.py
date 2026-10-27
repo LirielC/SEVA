@@ -1,4 +1,4 @@
-"""Generate an animated GIF showing the AutoResearcher Agent's trial-by-trial scientific progress."""
+"""Generate an animated GIF showing SEVA's trial-by-trial scientific progress with 4-way comparison."""
 
 from __future__ import annotations
 
@@ -17,18 +17,20 @@ PLOTS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def build_animated_gif() -> Path:
-    # Find the credit-g agent run and competing runs
-    agent_file = next(RUNS_DIR.glob("credit-g__autoresearcher_agent__seed*.json"), None)
+    # Prefer new SEVA agent files, fallback to older naming if needed
+    agent_file = (
+        next(RUNS_DIR.glob("credit-g__seva_heuristic_agent__seed*.json"), None)
+        or next(RUNS_DIR.glob("credit-g__seva_llm_agent__seed*.json"), None)
+        or next(RUNS_DIR.glob("credit-g__autoresearcher_agent__seed*.json"), None)
+    )
     if not agent_file:
         raise FileNotFoundError("Agent run file not found in artifacts/runs")
 
     agent_data = json.loads(agent_file.read_text(encoding="utf-8"))
-    trials = agent_data["trials"]
+    raw_trials = agent_data["trials"]
 
-    # Also load competing baselines on credit-g
     optuna_file = next(RUNS_DIR.glob("credit-g__optuna_tpe__seed*.json"), None)
     random_file = next(RUNS_DIR.glob("credit-g__random_search__seed*.json"), None)
-    grid_file = next(RUNS_DIR.glob("credit-g__grid_search__seed*.json"), None)
 
     optuna_curve = (
         [t["best_val_macro_f1_so_far"] for t in json.loads(optuna_file.read_text(encoding="utf-8"))["trials"]]
@@ -40,18 +42,21 @@ def build_animated_gif() -> Path:
         if random_file
         else []
     )
-    grid_curve = (
-        [t["best_val_macro_f1_so_far"] for t in json.loads(grid_file.read_text(encoding="utf-8"))["trials"]]
-        if grid_file
-        else []
-    )
+
+    n_trials = len(raw_trials)
+    if optuna_curve:
+        n_trials = min(n_trials, len(optuna_curve))
+    if random_curve:
+        n_trials = min(n_trials, len(random_curve))
+
+    trials = raw_trials[:n_trials]
+    agent_curve = [t["best_val_macro_f1_so_far"] for t in trials]
+    optuna_curve = optuna_curve[:n_trials]
+    random_curve = random_curve[:n_trials]
 
     frames: list[Image.Image] = []
     tmp_frame_dir = PLOTS_DIR / "_temp_frames"
     tmp_frame_dir.mkdir(parents=True, exist_ok=True)
-
-    n_trials = len(trials)
-    agent_curve = [t["best_val_macro_f1_so_far"] for t in trials]
 
     for step in range(n_trials):
         current_t = trials[step]
@@ -59,20 +64,22 @@ def build_animated_gif() -> Path:
         dec = current_t.get("agent_decision") or {}
         diag_text = dec.get("bottleneck_diagnosis", diag.get("diagnostic_summary_text", ""))
         hyp_text = dec.get("scientific_hypothesis", "Testing regularized pipeline configuration.")
+        exp_text = dec.get("expected_outcome", "Improve validation Macro-F1.")
+        obs_text = current_t.get("observed_outcome") or f"Val Macro-F1 = {diag['val_macro_f1']:.4f}"
         model_name = current_t["config"]["model_family"].upper()
 
         fig = plt.figure(figsize=(10.5, 6.2), dpi=120)
         fig.patch.set_facecolor("#0F172A")  # Deep Navy Slate background
 
         # Subplot 1: Convergence Curves
-        ax1 = fig.add_axes([0.08, 0.42, 0.88, 0.48])
+        ax1 = fig.add_axes([0.08, 0.44, 0.88, 0.46])
         ax1.set_facecolor("#1E293B")
 
         steps_range = np.arange(step + 1)
         ax1.plot(
             steps_range,
             agent_curve[: step + 1],
-            label="AutoResearcher (Agent)",
+            label="SEVA (Agent)",
             color="#10B981",
             linewidth=3.2,
             marker="o",
@@ -101,24 +108,15 @@ def build_animated_gif() -> Path:
                 marker="^",
                 markersize=5,
             )
-        if grid_curve:
-            ax1.plot(
-                steps_range,
-                grid_curve[: step + 1],
-                label="Grid Search",
-                color="#94A3B8",
-                linewidth=1.5,
-                linestyle="-.",
-            )
 
-        ax1.set_xlim(-0.3, n_trials - 0.7)
-        ax1.set_ylim(0.87, 0.93)
+        ax1.set_xlim(-0.3, max(1.0, n_trials - 0.7))
+        ax1.set_ylim(0.87, 0.94)
         ax1.set_title(
-            f"AutoResearcher Live Scientific Loop — Trial {step + 1}/{n_trials} (Dataset: credit-g)",
-            fontsize=13,
+            f"SEVA Closed-Loop Scientific Execution — Trial {step + 1}/{n_trials} (Dataset: credit-g)",
+            fontsize=12.5,
             fontweight="bold",
             color="#F8FAFC",
-            pad=12,
+            pad=10,
         )
         ax1.set_xlabel("Trial Budget Step", fontsize=10, color="#CBD5E1")
         ax1.set_ylabel("Best Val Macro-F1", fontsize=10, color="#CBD5E1")
@@ -131,7 +129,7 @@ def build_animated_gif() -> Path:
             text.set_color("#F8FAFC")
 
         # Subplot 2: Scientific Lab Notebook Card (Bottom)
-        ax2 = fig.add_axes([0.08, 0.06, 0.88, 0.28])
+        ax2 = fig.add_axes([0.08, 0.05, 0.88, 0.32])
         ax2.set_facecolor("#1E293B")
         ax2.set_xticks([])
         ax2.set_yticks([])
@@ -139,36 +137,45 @@ def build_animated_gif() -> Path:
             spine.set_color("#10B981" if current_t["was_new_best"] else "#334155")
             spine.set_linewidth(2.0 if current_t["was_new_best"] else 1.0)
 
-        badge = "★ NEW RECORD ACHIEVED" if current_t["was_new_best"] else "• Iteration"
+        badge = "[NEW BEST RECORD]" if current_t["was_new_best"] else "[Exploration]"
         badge_color = "#34D399" if current_t["was_new_best"] else "#94A3B8"
 
         ax2.text(
             0.02,
-            0.82,
-            f"TRIAL #{step}  [{model_name}] — Val Macro-F1: {diag['val_macro_f1']:.4f}  |  Overfit Gap: {diag['overfit_gap']:+.4f}  |  {badge}",
-            fontsize=10.5,
+            0.84,
+            f"TRIAL #{step}  [{model_name}] — Val Macro-F1: {diag['val_macro_f1']:.4f}  |  Gap: {diag['overfit_gap']:+.4f}  |  {badge}",
+            fontsize=10.0,
             fontweight="bold",
             color=badge_color,
             transform=ax2.transAxes,
         )
 
-        clean_diag = (diag_text[:110] + "...") if len(diag_text) > 110 else diag_text
+        clean_diag = (diag_text[:115] + "...") if len(diag_text) > 115 else diag_text
         clean_hyp = (hyp_text[:120] + "...") if len(hyp_text) > 120 else hyp_text
+        clean_obs = (obs_text[:115] + "...") if len(obs_text) > 115 else obs_text
 
         ax2.text(
             0.02,
-            0.48,
-            f"[DIAGNOSIS]  {clean_diag}",
-            fontsize=9.0,
+            0.58,
+            f"[DIAGNOSIS]   {clean_diag}",
+            fontsize=8.5,
             color="#E2E8F0",
             transform=ax2.transAxes,
         )
         ax2.text(
             0.02,
-            0.18,
-            f"[HYPOTHESIS] {clean_hyp}",
-            fontsize=9.0,
+            0.32,
+            f"[HYPOTHESIS]  {clean_hyp}",
+            fontsize=8.5,
             color="#67E8F9",
+            transform=ax2.transAxes,
+        )
+        ax2.text(
+            0.02,
+            0.08,
+            f"[OBSERVED]    {clean_obs}",
+            fontsize=8.5,
+            color="#A7F3D0" if current_t.get("hypothesis_confirmed") else "#FCA5A5",
             transform=ax2.transAxes,
         )
 
@@ -178,11 +185,9 @@ def build_animated_gif() -> Path:
 
         img = Image.open(frame_path)
         frames.append(img)
-        # Duplicate new-best frames slightly to give user time to read
         if current_t["was_new_best"]:
             frames.append(img)
 
-    # Add 2 final freeze frames
     for _ in range(4):
         frames.append(frames[-1])
 
@@ -191,11 +196,10 @@ def build_animated_gif() -> Path:
         gif_path,
         save_all=True,
         append_images=frames[1:],
-        duration=1200,  # 1.2s per frame
+        duration=1300,
         loop=0,
     )
 
-    # Clean up temp frames
     for f in tmp_frame_dir.glob("*.png"):
         f.unlink()
     tmp_frame_dir.rmdir()

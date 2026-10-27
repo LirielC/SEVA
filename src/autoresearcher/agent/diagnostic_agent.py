@@ -1,8 +1,8 @@
-"""AutoResearcher Diagnostic Agent with Scientific Hypothesis loop and Anti-Duplication Guardrails."""
+"""SEVA Diagnostic and LLM Agents with Scientific Hypothesis loop and Anti-Duplication Guardrails."""
 
 from __future__ import annotations
 
-from typing import List, Set, Tuple
+from typing import List, Literal, Optional, Set, Tuple
 import numpy as np
 
 from autoresearcher.agent.llm_client import LLMResearcherClient
@@ -12,24 +12,25 @@ from autoresearcher.schemas import AgentDecision, DatasetProfile, PipelineConfig
 
 
 class AutoResearcherAgent:
-    """Autonomous ML Research Agent guided by error analysis, confusion matrices, and train-val gap."""
-
-    name: str = "AutoResearcher (Agent)"
+    """Scientific ML Research Agent supporting Heuristic Diagnostic and LLM Reasoning modes."""
 
     def __init__(
         self,
         profile: DatasetProfile,
         budget: int = 15,
         seed: int = 42,
+        mode: Literal["heuristic", "llm"] = "heuristic",
         settings: Settings = SETTINGS,
     ) -> None:
         self.profile = profile
         self.budget = budget
         self.seed = seed
+        self.mode = mode
+        self.name = "SEVA (LLM Agent)" if mode == "llm" else "SEVA (Heuristic Agent)"
         self.rng = np.random.default_rng(seed)
         self.seen_hashes: Set[str] = set()
         self.llm_client = LLMResearcherClient(settings=settings)
-        self.last_decision: AgentDecision | None = None
+        self.last_decision: Optional[AgentDecision] = None
 
     def suggest_next(self, history: List[TrialRecord]) -> Tuple[PipelineConfig, AgentDecision]:
         """Analyze prior trial diagnostics and emit both the next PipelineConfig and AgentDecision."""
@@ -47,6 +48,7 @@ class AutoResearcherAgent:
                     "(depth=10, OneHot encoding, no class balancing) to expose dataset pathologies "
                     "(overfitting gap, minority class recall, and confused class pairs)."
                 ),
+                expected_outcome="Establish benchmark anchor and compute baseline error distribution across all classes.",
                 exploration_mode="baseline",
                 changed_components=["baseline_initialization"],
                 config=base_cfg,
@@ -54,39 +56,41 @@ class AutoResearcherAgent:
             self.last_decision = decision
             return base_cfg, decision
 
-        # 1. Try external LLM if configured and enabled
-        llm_decision = self.llm_client.request_decision(
-            profile=self.profile,
-            history=history,
-            budget=self.budget,
-        )
-        if llm_decision is not None:
-            h = llm_decision.config.config_hash()
-            if h not in self.seen_hashes:
-                best_cfg = max(history, key=lambda t: t.diagnostics.val_macro_f1).config
-                llm_decision.changed_components = llm_decision.config.diff_from(best_cfg) or ["hyperparameter_step"]
-                self.seen_hashes.add(h)
-                self.last_decision = llm_decision
-                return llm_decision.config, llm_decision
+        # If LLM mode requested, try external LLM reasoning first
+        if self.mode == "llm":
+            llm_decision = self.llm_client.request_decision(
+                profile=self.profile,
+                history=history,
+                budget=self.budget,
+            )
+            if llm_decision is not None:
+                h = llm_decision.config.config_hash()
+                if h not in self.seen_hashes:
+                    best_cfg = max(history, key=lambda t: t.diagnostics.val_macro_f1).config
+                    llm_decision.changed_components = llm_decision.config.diff_from(best_cfg) or ["hyperparameter_step"]
+                    self.seen_hashes.add(h)
+                    self.last_decision = llm_decision
+                    return llm_decision.config, llm_decision
 
-        # 2. Diagnostic Scientific Engine (used when running offline/CI or if LLM proposed a duplicate)
+        # Diagnostic Scientific Engine (standard for heuristic mode, or reliable fallback for LLM mode)
         decision = self._synthesize_diagnostic_experiment(history)
+        if self.mode == "llm" and self.llm_client.is_available:
+            decision.scientific_hypothesis = f"[LLM Anti-Duplication Repair] {decision.scientific_hypothesis}"
+
         self.seen_hashes.add(decision.config.config_hash())
         self.last_decision = decision
         return decision.config, decision
 
     def _synthesize_diagnostic_experiment(self, history: List[TrialRecord]) -> AgentDecision:
-        """Formulate a rigorous diagnostic hypothesis based on validation error patterns."""
+        """Formulate a rigorous diagnostic hypothesis and testable expected outcome based on validation error patterns."""
         best_trial = max(history, key=lambda t: t.diagnostics.val_macro_f1)
-        last_trial = history[-1]
         best_cfg = best_trial.config
         best_diag = best_trial.diagnostics
 
-        # Count how many trials since the last improvement
         trials_since_best = len(history) - 1 - best_trial.trial_index
         tested_families = {t.config.model_family for t in history}
 
-        candidates: List[Tuple[str, str, str, PipelineConfig]] = []
+        candidates: List[Tuple[str, str, str, str, PipelineConfig]] = []
 
         # Branch A: Severe Minority Class Collapse or Imbalance Not Yet Addressed
         if (
@@ -106,6 +110,7 @@ class AutoResearcherAgent:
                 f"vs best class F1={best_diag.best_class_f1:.4f} (dataset imbalance_ratio={self.profile.imbalance_ratio:.2f}).",
                 f"If we enable cost-sensitive learning (`class_weight_balanced`) and probability threshold tuning on top of Trial #{best_trial.trial_index}, "
                 f"recall on minority class '{best_diag.worst_class_label}' will recover and lift overall Val Macro-F1.",
+                f"Increase worst_class_f1 from {best_diag.worst_class_f1:.4f} by at least +0.05 and improve Val Macro-F1.",
                 "exploit_refinement",
                 cfg1,
             ))
@@ -130,11 +135,12 @@ class AutoResearcherAgent:
                 f"If we constrain tree complexity (`max_depth={new_depth}`, `min_samples_leaf={min(12, new_leaf)}`), "
                 f"apply stochastic subsampling (`subsample=0.8`), and raise L2 regularization to {new_reg}, "
                 f"generalization on validation folds will improve.",
+                f"Reduce overfit_gap from {best_diag.overfit_gap:+.4f} below +0.08 while sustaining or increasing Val Macro-F1.",
                 "exploit_refinement",
                 cfg_reg,
             ))
 
-        # Branch C: Explore Gradient Boosting Families (CatBoost & XGBoost) with appropriate encoding
+        # Branch C: Explore Gradient Boosting Families (CatBoost & XGBoost)
         if "catboost" not in tested_families:
             enc = "target_smooth" if self.profile.n_categorical > 0 else "onehot"
             imb = "class_weight_balanced" if self.profile.imbalance_ratio >= 1.35 else best_cfg.imbalance_strategy
@@ -156,6 +162,7 @@ class AutoResearcherAgent:
                 f"oblivious trees (`catboost`) unexplored. Top confusion is {self._format_top_confusion(best_diag)}.",
                 f"If we switch to `catboost` (250 iterations, depth=6, lr=0.08, L2=3.0) with `{enc}` encoding, "
                 f"symmetric decision tables will reduce variance and better separate overlapping decision boundaries.",
+                f"Achieve Val Macro-F1 higher than current best ({best_diag.val_macro_f1:.4f}) with decreased error count on top confused pair.",
                 "explore_new_family",
                 cfg_cb,
             ))
@@ -182,11 +189,12 @@ class AutoResearcherAgent:
                 f"(F1={best_diag.worst_class_f1:.4f}). Depth-wise gradient boosting (`xgboost`) with engineered interactions has not been tested.",
                 f"If we test `xgboost` (depth=5, lr=0.08, reg_lambda=3.0) combined with `{fe_choice}` feature interactions "
                 f"and `robust` scaling, non-linear boundaries between confused classes will sharpen.",
+                f"Outperform {best_cfg.model_family} baseline by at least +0.01 in Macro-F1 via non-linear feature combinations.",
                 "explore_new_family",
                 cfg_xgb,
             ))
 
-        # Branch D: Targeted Feature Engineering & Representation Refinement on Best Model
+        # Branch D: Targeted Feature Engineering & Representation Refinement
         for fe_op, scaler_op, reason in [
             (
                 "ratios_top5",
@@ -220,6 +228,7 @@ class AutoResearcherAgent:
                 f"top confusion: {self._format_top_confusion(best_diag)}).",
                 f"If we apply `{fe_op}` feature engineering with `{scaler_op}` scaling while keeping the winning `{best_cfg.model_family}` backbone, "
                 f"Macro-F1 will improve because: {reason}",
+                f"Increase Val Macro-F1 above {best_diag.val_macro_f1:.4f} by reducing representation noise.",
                 "exploit_refinement",
                 cfg_fe,
             ))
@@ -239,6 +248,7 @@ class AutoResearcherAgent:
                         f"vs best class F1={best_diag.best_class_f1:.4f}.",
                         f"If we adjust class balancing to `{imb_strat}` with `threshold_tuning={th_flag}` on `{best_cfg.model_family}`, "
                         f"the precision-recall trade-off across classes will improve Macro-F1.",
+                        f"Improve balanced accuracy and raise worst_class_f1 above {best_diag.worst_class_f1:.4f}.",
                         "exploit_refinement",
                         cfg_imb,
                     ))
@@ -250,11 +260,12 @@ class AutoResearcherAgent:
                     f"Dataset has {self.profile.n_categorical} categorical features; current encoder is `{best_cfg.categorical_encoder}`.",
                     f"If we switch categorical representation to `{enc_choice}` on the current best pipeline, "
                     f"tree splits on categorical levels will capture stronger signal with less sparsity.",
+                    f"Capture higher feature splits on categorical attributes and improve Val F1.",
                     "exploit_refinement",
                     cfg_enc,
                 ))
 
-        # Branch F: Capacity & Regularization Schedule (Fine-tuning learning_rate, n_estimators, max_depth, reg)
+        # Branch F: Capacity & Regularization Schedule
         tuning_grid = [
             {"n_estimators": 350, "learning_rate": 0.05, "max_depth": 6, "regularization": 3.0},
             {"n_estimators": 250, "learning_rate": 0.12, "max_depth": 8, "regularization": 1.0},
@@ -271,12 +282,13 @@ class AutoResearcherAgent:
                 f"(Val F1={best_diag.val_macro_f1:.4f}, Overfit Gap={best_diag.overfit_gap:+.4f}).",
                 f"If we update capacity parameters to {mod_dict} on `{cfg_tune.model_family}`, "
                 f"we balance bias and variance to reduce the remaining confusion ({self._format_top_confusion(best_diag)}).",
+                f"Attain peak validation convergence by fine-tuning tree complexity.",
                 mode,
                 cfg_tune,
             ))
 
         # Select the first candidate whose canonical hash has NEVER been evaluated
-        for diag_text, hyp_text, mode_str, cand_cfg in candidates:
+        for diag_text, hyp_text, exp_outcome, mode_str, cand_cfg in candidates:
             if self.profile.n_classes > 2 and cand_cfg.threshold_tuning:
                 cand_cfg = cand_cfg.model_copy(update={"threshold_tuning": False})
             if cand_cfg.config_hash() not in self.seen_hashes:
@@ -284,6 +296,7 @@ class AutoResearcherAgent:
                 return AgentDecision(
                     bottleneck_diagnosis=diag_text,
                     scientific_hypothesis=hyp_text,
+                    expected_outcome=exp_outcome,
                     exploration_mode=mode_str,  # type: ignore[arg-type]
                     changed_components=diffs if diffs else ["hyperparameter_refinement"],
                     config=cand_cfg,
@@ -294,6 +307,7 @@ class AutoResearcherAgent:
         return AgentDecision(
             bottleneck_diagnosis=f"Local neighborhood around Trial #{best_trial.trial_index} exhausted; initiating exploratory jump.",
             scientific_hypothesis="Sample an unexplored region of the 5-layer pipeline space to escape local optimum.",
+            expected_outcome="Discover a new high-performing region in the CASH search space.",
             exploration_mode="explore_new_family",
             changed_components=fallback_cfg.diff_from(best_cfg),
             config=fallback_cfg,
