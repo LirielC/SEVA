@@ -3,31 +3,31 @@
   "dataset_name": "phoneme",
   "seed": 42,
   "budget": 6,
-  "best_val_macro_f1": 0.80995,
-  "holdout_test_macro_f1": 0.82081,
-  "baseline_val_macro_f1": 0.7854,
-  "improvement_over_baseline": 0.02455,
-  "trials_to_95pct_peak": 3,
-  "trials_to_target_threshold": 3,
-  "auc_convergence": 0.7997,
-  "total_elapsed_seconds": 12.2417,
+  "best_val_macro_f1": 0.85196,
+  "holdout_test_macro_f1": 0.86766,
+  "baseline_val_macro_f1": 0.83454,
+  "improvement_over_baseline": 0.01742,
+  "trials_to_95pct_peak": 5,
+  "trials_to_target_threshold": 5,
+  "auc_convergence": 0.83807,
+  "total_elapsed_seconds": 27.6089,
   "total_llm_tokens": 0,
   "total_llm_cost_usd": 0.0,
   "total_llm_calls": 0,
   "best_config": {
     "imputer": "median",
-    "scaler": "none",
+    "scaler": "standard",
     "categorical_encoder": "onehot",
-    "feature_engineering": "none",
-    "imbalance_strategy": "none",
-    "threshold_tuning": false,
+    "feature_engineering": "ratios_top5",
+    "imbalance_strategy": "class_weight_balanced",
+    "threshold_tuning": true,
     "model_family": "catboost",
     "n_estimators": 250,
-    "max_depth": 4,
+    "max_depth": 6,
     "learning_rate": 0.08,
-    "regularization": 12.0,
-    "subsample": 0.8,
-    "min_samples_leaf": 4
+    "regularization": 3.0,
+    "subsample": 0.85,
+    "min_samples_leaf": 1
   },
   "trials": [
     {
@@ -52,46 +52,46 @@
       },
       "config_hash": "b8f37a49ce80",
       "diagnostics": {
-        "val_macro_f1": 0.7854,
-        "val_std_f1": 0.03143,
-        "train_macro_f1": 0.99452,
-        "overfit_gap": 0.20912,
-        "val_balanced_accuracy": 0.78494,
+        "val_macro_f1": 0.83454,
+        "val_std_f1": 0.01517,
+        "train_macro_f1": 0.98597,
+        "overfit_gap": 0.15143,
+        "val_balanced_accuracy": 0.83205,
         "per_class_f1": {
-          "nasal": 0.8004,
-          "oral": 0.7704
+          "1": 0.9043,
+          "2": 0.7651
         },
-        "worst_class_label": "oral",
-        "worst_class_f1": 0.7704,
-        "best_class_f1": 0.8004,
+        "worst_class_label": "2",
+        "worst_class_f1": 0.7651,
+        "best_class_f1": 0.9043,
         "top_confused_pairs": [
           {
-            "true_class": "oral",
-            "predicted_class": "nasal",
-            "error_count": 118,
-            "error_rate_within_true_class": 0.2554
+            "true_class": "2",
+            "predicted_class": "1",
+            "error_count": 144,
+            "error_rate_within_true_class": 0.2453
           },
           {
-            "true_class": "nasal",
-            "predicted_class": "oral",
-            "error_count": 87,
-            "error_rate_within_true_class": 0.1747
+            "true_class": "1",
+            "predicted_class": "2",
+            "error_count": 128,
+            "error_rate_within_true_class": 0.0906
           }
         ],
         "top_features": [
-          "formant_freq_3 (0.199)",
-          "formant_freq_1 (0.194)",
-          "formant_freq_2 (0.125)",
-          "formant_freq_5 (0.110)",
-          "formant_freq_4 (0.107)"
+          "V4 (0.274)",
+          "V3 (0.213)",
+          "V1 (0.193)",
+          "V5 (0.166)",
+          "V2 (0.154)"
         ],
         "primary_pathology": "severe_overfitting",
-        "diagnostic_summary_text": "Val Macro-F1=0.7854 (±0.0314), Train Macro-F1=0.9945 (Overfit Gap=+0.2091). Worst Class='oral' (F1=0.7704 vs Best=0.8004). Top Confusion: oral->nasal (118 errors). Primary Pathology: severe_overfitting."
+        "diagnostic_summary_text": "Val Macro-F1=0.8345 (±0.0152), Train Macro-F1=0.9860 (Overfit Gap=+0.1514). Worst Class='2' (F1=0.7651 vs Best=0.9043). Top Confusion: 2->1 (144 errors). Primary Pathology: severe_overfitting."
       },
-      "best_val_macro_f1_so_far": 0.7854,
-      "elapsed_seconds": 0.9248,
+      "best_val_macro_f1_so_far": 0.83454,
+      "elapsed_seconds": 1.2745,
       "agent_decision": {
-        "bottleneck_diagnosis": "Initial state on 'phoneme' (960 dev rows, 8 numeric & 0 categorical features, imbalance_ratio=1.08). No model metrics collected yet.",
+        "bottleneck_diagnosis": "Initial state on 'phoneme' (2000 dev rows, 5 numeric & 0 categorical features, imbalance_ratio=2.41). No model metrics collected yet.",
         "scientific_hypothesis": "Establish a reference anchor using an unregularized RandomForest baseline (depth=10, OneHot encoding, no class balancing) to expose dataset pathologies (overfitting gap, minority class recall, and confused class pairs).",
         "expected_outcome": "Establish benchmark anchor and compute baseline error distribution across all classes.",
         "exploration_mode": "baseline",
@@ -116,7 +116,7 @@
         "token_usage": null
       },
       "was_new_best": true,
-      "observed_outcome": "Baseline established: Val Macro-F1=0.7854, Overfit Gap=+0.2091, Worst Class F1=0.7704.",
+      "observed_outcome": "Baseline established: Val Macro-F1=0.8345, Overfit Gap=+0.1514, Worst Class F1=0.7651.",
       "hypothesis_confirmed": true,
       "token_usage": null
     },
@@ -142,48 +142,48 @@
       },
       "config_hash": "559d98b23b60",
       "diagnostics": {
-        "val_macro_f1": 0.75808,
-        "val_std_f1": 0.04212,
-        "train_macro_f1": 0.89718,
-        "overfit_gap": 0.1391,
-        "val_balanced_accuracy": 0.75797,
+        "val_macro_f1": 0.8121,
+        "val_std_f1": 0.0213,
+        "train_macro_f1": 0.89333,
+        "overfit_gap": 0.08123,
+        "val_balanced_accuracy": 0.80629,
         "per_class_f1": {
-          "nasal": 0.781,
-          "oral": 0.7356
+          "1": 0.894,
+          "2": 0.7314
         },
-        "worst_class_label": "oral",
-        "worst_class_f1": 0.7356,
-        "best_class_f1": 0.781,
+        "worst_class_label": "2",
+        "worst_class_f1": 0.7314,
+        "best_class_f1": 0.894,
         "top_confused_pairs": [
           {
-            "true_class": "oral",
-            "predicted_class": "nasal",
-            "error_count": 142,
-            "error_rate_within_true_class": 0.3074
+            "true_class": "2",
+            "predicted_class": "1",
+            "error_count": 173,
+            "error_rate_within_true_class": 0.2947
           },
           {
-            "true_class": "nasal",
-            "predicted_class": "oral",
-            "error_count": 88,
-            "error_rate_within_true_class": 0.1767
+            "true_class": "1",
+            "predicted_class": "2",
+            "error_count": 131,
+            "error_rate_within_true_class": 0.0927
           }
         ],
         "top_features": [
-          "formant_freq_3 (0.237)",
-          "formant_freq_1 (0.208)",
-          "formant_freq_2 (0.115)",
-          "formant_freq_5 (0.106)",
-          "formant_freq_4 (0.105)"
+          "V4 (0.313)",
+          "V3 (0.213)",
+          "V1 (0.179)",
+          "V5 (0.158)",
+          "V2 (0.137)"
         ],
-        "primary_pathology": "feature_noise_or_representation",
-        "diagnostic_summary_text": "Val Macro-F1=0.7581 (±0.0421), Train Macro-F1=0.8972 (Overfit Gap=+0.1391). Worst Class='oral' (F1=0.7356 vs Best=0.7810). Top Confusion: oral->nasal (142 errors). Primary Pathology: feature_noise_or_representation."
+        "primary_pathology": "well_balanced_needs_fine_tuning",
+        "diagnostic_summary_text": "Val Macro-F1=0.8121 (±0.0213), Train Macro-F1=0.8933 (Overfit Gap=+0.0812). Worst Class='2' (F1=0.7314 vs Best=0.8940). Top Confusion: 2->1 (173 errors). Primary Pathology: well_balanced_needs_fine_tuning."
       },
-      "best_val_macro_f1_so_far": 0.7854,
-      "elapsed_seconds": 0.8838,
+      "best_val_macro_f1_so_far": 0.83454,
+      "elapsed_seconds": 1.1163,
       "agent_decision": {
-        "bottleneck_diagnosis": "High variance / overfitting detected in Trial #0: Train Macro-F1=0.9945 vs Val Macro-F1=0.7854 (overfit_gap=+0.2091).",
+        "bottleneck_diagnosis": "High variance / overfitting detected in Trial #0: Train Macro-F1=0.9860 vs Val Macro-F1=0.8345 (overfit_gap=+0.1514).",
         "scientific_hypothesis": "If we constrain tree complexity (`max_depth=7`, `min_samples_leaf=4`), apply stochastic subsampling (`subsample=0.8`), and raise L2 regularization to 6.0, generalization on validation folds will improve.",
-        "expected_outcome": "Reduce overfit_gap from +0.2091 below +0.08 while sustaining or increasing Val Macro-F1.",
+        "expected_outcome": "Reduce overfit_gap from +0.1514 below +0.08 while sustaining or increasing Val Macro-F1.",
         "exploration_mode": "exploit_refinement",
         "changed_components": [
           "max_depth: 10 -> 7",
@@ -209,7 +209,7 @@
         "token_usage": null
       },
       "was_new_best": false,
-      "observed_outcome": "REFUTED/SUB-PEAK: Val Macro-F1=0.7581 (-0.0273 vs peak 0.7854), Overfit Gap=+0.1391.",
+      "observed_outcome": "REFUTED/SUB-PEAK: Val Macro-F1=0.8121 (-0.0224 vs peak 0.8345), Overfit Gap=+0.0812.",
       "hypothesis_confirmed": false,
       "token_usage": null
     },
@@ -223,8 +223,8 @@
         "scaler": "none",
         "categorical_encoder": "onehot",
         "feature_engineering": "none",
-        "imbalance_strategy": "none",
-        "threshold_tuning": false,
+        "imbalance_strategy": "class_weight_balanced",
+        "threshold_tuning": true,
         "model_family": "catboost",
         "n_estimators": 250,
         "max_depth": 6,
@@ -233,52 +233,54 @@
         "subsample": 0.85,
         "min_samples_leaf": 1
       },
-      "config_hash": "dfac213831c2",
+      "config_hash": "18c33b13b022",
       "diagnostics": {
-        "val_macro_f1": 0.79753,
-        "val_std_f1": 0.02723,
-        "train_macro_f1": 0.99922,
-        "overfit_gap": 0.20169,
-        "val_balanced_accuracy": 0.79795,
+        "val_macro_f1": 0.83579,
+        "val_std_f1": 0.0082,
+        "train_macro_f1": 0.98157,
+        "overfit_gap": 0.14578,
+        "val_balanced_accuracy": 0.83261,
         "per_class_f1": {
-          "nasal": 0.8036,
-          "oral": 0.7918
+          "1": 0.9055,
+          "2": 0.7667
         },
-        "worst_class_label": "oral",
-        "worst_class_f1": 0.7918,
-        "best_class_f1": 0.8036,
+        "worst_class_label": "2",
+        "worst_class_f1": 0.7667,
+        "best_class_f1": 0.9055,
         "top_confused_pairs": [
           {
-            "true_class": "nasal",
-            "predicted_class": "oral",
-            "error_count": 101,
-            "error_rate_within_true_class": 0.2028
+            "true_class": "2",
+            "predicted_class": "1",
+            "error_count": 145,
+            "error_rate_within_true_class": 0.247
           },
           {
-            "true_class": "oral",
-            "predicted_class": "nasal",
-            "error_count": 93,
-            "error_rate_within_true_class": 0.2013
+            "true_class": "1",
+            "predicted_class": "2",
+            "error_count": 124,
+            "error_rate_within_true_class": 0.0878
           }
         ],
         "top_features": [
-          "formant_freq_1 (22.734)",
-          "formant_freq_3 (20.964)",
-          "formant_freq_2 (15.141)",
-          "formant_freq_7 (10.050)",
-          "formant_freq_5 (8.643)"
+          "V1 (25.448)",
+          "V3 (21.576)",
+          "V2 (19.966)",
+          "V4 (17.671)",
+          "V5 (15.338)"
         ],
         "primary_pathology": "severe_overfitting",
-        "diagnostic_summary_text": "Val Macro-F1=0.7975 (±0.0272), Train Macro-F1=0.9992 (Overfit Gap=+0.2017). Worst Class='oral' (F1=0.7918 vs Best=0.8036). Top Confusion: nasal->oral (101 errors). Primary Pathology: severe_overfitting."
+        "diagnostic_summary_text": "Val Macro-F1=0.8358 (±0.0082), Train Macro-F1=0.9816 (Overfit Gap=+0.1458). Worst Class='2' (F1=0.7667 vs Best=0.9055). Top Confusion: 2->1 (145 errors). Primary Pathology: severe_overfitting."
       },
-      "best_val_macro_f1_so_far": 0.79753,
-      "elapsed_seconds": 4.7293,
+      "best_val_macro_f1_so_far": 0.83579,
+      "elapsed_seconds": 4.0021,
       "agent_decision": {
-        "bottleneck_diagnosis": "Current best uses 'random_forest' (Val F1=0.7854), leaving symmetric oblivious trees (`catboost`) unexplored. Top confusion is 'oral' misclassified as 'nasal' (118 errors, 25.5%).",
+        "bottleneck_diagnosis": "Current best uses 'random_forest' (Val F1=0.8345), leaving symmetric oblivious trees (`catboost`) unexplored. Top confusion is '2' misclassified as '1' (144 errors, 24.5%).",
         "scientific_hypothesis": "If we switch to `catboost` (250 iterations, depth=6, lr=0.08, L2=3.0) with `onehot` encoding, symmetric decision tables will reduce variance and better separate overlapping decision boundaries.",
-        "expected_outcome": "Achieve Val Macro-F1 higher than current best (0.7854) with decreased error count on top confused pair.",
+        "expected_outcome": "Achieve Val Macro-F1 higher than current best (0.8345) with decreased error count on top confused pair.",
         "exploration_mode": "explore_new_family",
         "changed_components": [
+          "imbalance_strategy: none -> class_weight_balanced",
+          "threshold_tuning: False -> True",
           "model_family: random_forest -> catboost",
           "n_estimators: 100 -> 250",
           "max_depth: 10 -> 6",
@@ -291,8 +293,8 @@
           "scaler": "none",
           "categorical_encoder": "onehot",
           "feature_engineering": "none",
-          "imbalance_strategy": "none",
-          "threshold_tuning": false,
+          "imbalance_strategy": "class_weight_balanced",
+          "threshold_tuning": true,
           "model_family": "catboost",
           "n_estimators": 250,
           "max_depth": 6,
@@ -304,7 +306,7 @@
         "token_usage": null
       },
       "was_new_best": true,
-      "observed_outcome": "CONFIRMED: New peak reached. Val Macro-F1=0.7975 (+0.0121 vs prior best), Overfit Gap=+0.2017, Worst Class 'oral' F1=0.7918.",
+      "observed_outcome": "CONFIRMED: New peak reached. Val Macro-F1=0.8358 (+0.0013 vs prior best), Overfit Gap=+0.1458, Worst Class '2' F1=0.7667.",
       "hypothesis_confirmed": true,
       "token_usage": null
     },
@@ -318,8 +320,8 @@
         "scaler": "none",
         "categorical_encoder": "onehot",
         "feature_engineering": "none",
-        "imbalance_strategy": "none",
-        "threshold_tuning": false,
+        "imbalance_strategy": "class_weight_balanced",
+        "threshold_tuning": true,
         "model_family": "catboost",
         "n_estimators": 250,
         "max_depth": 4,
@@ -328,50 +330,50 @@
         "subsample": 0.8,
         "min_samples_leaf": 4
       },
-      "config_hash": "82afc9fcf5f3",
+      "config_hash": "d55d6a50a195",
       "diagnostics": {
-        "val_macro_f1": 0.80995,
-        "val_std_f1": 0.03444,
-        "train_macro_f1": 0.94863,
-        "overfit_gap": 0.13868,
-        "val_balanced_accuracy": 0.80984,
+        "val_macro_f1": 0.82254,
+        "val_std_f1": 0.02705,
+        "train_macro_f1": 0.91756,
+        "overfit_gap": 0.09502,
+        "val_balanced_accuracy": 0.82242,
         "per_class_f1": {
-          "nasal": 0.8187,
-          "oral": 0.8013
+          "1": 0.8956,
+          "2": 0.7489
         },
-        "worst_class_label": "oral",
-        "worst_class_f1": 0.8013,
-        "best_class_f1": 0.8187,
+        "worst_class_label": "2",
+        "worst_class_f1": 0.7489,
+        "best_class_f1": 0.8956,
         "top_confused_pairs": [
           {
-            "true_class": "oral",
-            "predicted_class": "nasal",
-            "error_count": 95,
-            "error_rate_within_true_class": 0.2056
+            "true_class": "1",
+            "predicted_class": "2",
+            "error_count": 148,
+            "error_rate_within_true_class": 0.1047
           },
           {
-            "true_class": "nasal",
-            "predicted_class": "oral",
-            "error_count": 87,
-            "error_rate_within_true_class": 0.1747
+            "true_class": "2",
+            "predicted_class": "1",
+            "error_count": 147,
+            "error_rate_within_true_class": 0.2504
           }
         ],
         "top_features": [
-          "formant_freq_1 (26.722)",
-          "formant_freq_3 (23.814)",
-          "formant_freq_2 (17.379)",
-          "formant_freq_5 (7.916)",
-          "formant_freq_7 (7.593)"
+          "V1 (28.022)",
+          "V3 (23.339)",
+          "V4 (18.740)",
+          "V2 (17.885)",
+          "V5 (12.015)"
         ],
         "primary_pathology": "well_balanced_needs_fine_tuning",
-        "diagnostic_summary_text": "Val Macro-F1=0.8099 (±0.0344), Train Macro-F1=0.9486 (Overfit Gap=+0.1387). Worst Class='oral' (F1=0.8013 vs Best=0.8187). Top Confusion: oral->nasal (95 errors). Primary Pathology: well_balanced_needs_fine_tuning."
+        "diagnostic_summary_text": "Val Macro-F1=0.8225 (±0.0271), Train Macro-F1=0.9176 (Overfit Gap=+0.0950). Worst Class='2' (F1=0.7489 vs Best=0.8956). Top Confusion: 1->2 (148 errors). Primary Pathology: well_balanced_needs_fine_tuning."
       },
-      "best_val_macro_f1_so_far": 0.80995,
-      "elapsed_seconds": 1.8382,
+      "best_val_macro_f1_so_far": 0.83579,
+      "elapsed_seconds": 1.8301,
       "agent_decision": {
-        "bottleneck_diagnosis": "High variance / overfitting detected in Trial #2: Train Macro-F1=0.9992 vs Val Macro-F1=0.7975 (overfit_gap=+0.2017).",
+        "bottleneck_diagnosis": "High variance / overfitting detected in Trial #2: Train Macro-F1=0.9816 vs Val Macro-F1=0.8358 (overfit_gap=+0.1458).",
         "scientific_hypothesis": "If we constrain tree complexity (`max_depth=4`, `min_samples_leaf=4`), apply stochastic subsampling (`subsample=0.8`), and raise L2 regularization to 12.0, generalization on validation folds will improve.",
-        "expected_outcome": "Reduce overfit_gap from +0.2017 below +0.08 while sustaining or increasing Val Macro-F1.",
+        "expected_outcome": "Reduce overfit_gap from +0.1458 below +0.08 while sustaining or increasing Val Macro-F1.",
         "exploration_mode": "exploit_refinement",
         "changed_components": [
           "max_depth: 6 -> 4",
@@ -384,8 +386,8 @@
           "scaler": "none",
           "categorical_encoder": "onehot",
           "feature_engineering": "none",
-          "imbalance_strategy": "none",
-          "threshold_tuning": false,
+          "imbalance_strategy": "class_weight_balanced",
+          "threshold_tuning": true,
           "model_family": "catboost",
           "n_estimators": 250,
           "max_depth": 4,
@@ -396,9 +398,9 @@
         },
         "token_usage": null
       },
-      "was_new_best": true,
-      "observed_outcome": "CONFIRMED: New peak reached. Val Macro-F1=0.8099 (+0.0124 vs prior best), Overfit Gap=+0.1387, Worst Class 'oral' F1=0.8013.",
-      "hypothesis_confirmed": true,
+      "was_new_best": false,
+      "observed_outcome": "REFUTED/SUB-PEAK: Val Macro-F1=0.8225 (-0.0132 vs peak 0.8358), Overfit Gap=+0.0950.",
+      "hypothesis_confirmed": false,
       "token_usage": null
     },
     {
@@ -408,101 +410,11 @@
       "seed": 42,
       "config": {
         "imputer": "median",
-        "scaler": "none",
-        "categorical_encoder": "onehot",
-        "feature_engineering": "none",
-        "imbalance_strategy": "none",
-        "threshold_tuning": false,
-        "model_family": "catboost",
-        "n_estimators": 250,
-        "max_depth": 4,
-        "learning_rate": 0.08,
-        "regularization": 12.0,
-        "subsample": 0.8,
-        "min_samples_leaf": 8
-      },
-      "config_hash": "764dabc9d687",
-      "diagnostics": {
-        "val_macro_f1": 0.80995,
-        "val_std_f1": 0.03444,
-        "train_macro_f1": 0.94863,
-        "overfit_gap": 0.13868,
-        "val_balanced_accuracy": 0.80984,
-        "per_class_f1": {
-          "nasal": 0.8187,
-          "oral": 0.8013
-        },
-        "worst_class_label": "oral",
-        "worst_class_f1": 0.8013,
-        "best_class_f1": 0.8187,
-        "top_confused_pairs": [
-          {
-            "true_class": "oral",
-            "predicted_class": "nasal",
-            "error_count": 95,
-            "error_rate_within_true_class": 0.2056
-          },
-          {
-            "true_class": "nasal",
-            "predicted_class": "oral",
-            "error_count": 87,
-            "error_rate_within_true_class": 0.1747
-          }
-        ],
-        "top_features": [
-          "formant_freq_1 (26.722)",
-          "formant_freq_3 (23.814)",
-          "formant_freq_2 (17.379)",
-          "formant_freq_5 (7.916)",
-          "formant_freq_7 (7.593)"
-        ],
-        "primary_pathology": "well_balanced_needs_fine_tuning",
-        "diagnostic_summary_text": "Val Macro-F1=0.8099 (±0.0344), Train Macro-F1=0.9486 (Overfit Gap=+0.1387). Worst Class='oral' (F1=0.8013 vs Best=0.8187). Top Confusion: oral->nasal (95 errors). Primary Pathology: well_balanced_needs_fine_tuning."
-      },
-      "best_val_macro_f1_so_far": 0.80995,
-      "elapsed_seconds": 1.8347,
-      "agent_decision": {
-        "bottleneck_diagnosis": "High variance / overfitting detected in Trial #3: Train Macro-F1=0.9486 vs Val Macro-F1=0.8099 (overfit_gap=+0.1387).",
-        "scientific_hypothesis": "If we constrain tree complexity (`max_depth=4`, `min_samples_leaf=8`), apply stochastic subsampling (`subsample=0.8`), and raise L2 regularization to 12.0, generalization on validation folds will improve.",
-        "expected_outcome": "Reduce overfit_gap from +0.1387 below +0.08 while sustaining or increasing Val Macro-F1.",
-        "exploration_mode": "exploit_refinement",
-        "changed_components": [
-          "min_samples_leaf: 4 -> 8"
-        ],
-        "config": {
-          "imputer": "median",
-          "scaler": "none",
-          "categorical_encoder": "onehot",
-          "feature_engineering": "none",
-          "imbalance_strategy": "none",
-          "threshold_tuning": false,
-          "model_family": "catboost",
-          "n_estimators": 250,
-          "max_depth": 4,
-          "learning_rate": 0.08,
-          "regularization": 12.0,
-          "subsample": 0.8,
-          "min_samples_leaf": 8
-        },
-        "token_usage": null
-      },
-      "was_new_best": false,
-      "observed_outcome": "REFUTED/SUB-PEAK: Val Macro-F1=0.8099 (+0.0000 vs peak 0.8099), Overfit Gap=+0.1387.",
-      "hypothesis_confirmed": false,
-      "token_usage": null
-    },
-    {
-      "trial_index": 5,
-      "strategy_name": "SEVA (Heuristic Agent)",
-      "dataset_name": "phoneme",
-      "seed": 42,
-      "config": {
-        "imputer": "median",
         "scaler": "robust",
         "categorical_encoder": "onehot",
-        "feature_engineering": "ratios_top5",
-        "imbalance_strategy": "none",
-        "threshold_tuning": false,
+        "feature_engineering": "poly_top5",
+        "imbalance_strategy": "class_weight_balanced",
+        "threshold_tuning": true,
         "model_family": "xgboost",
         "n_estimators": 250,
         "max_depth": 5,
@@ -511,67 +423,65 @@
         "subsample": 0.85,
         "min_samples_leaf": 2
       },
-      "config_hash": "bc492a6efd15",
+      "config_hash": "9de22167afdf",
       "diagnostics": {
-        "val_macro_f1": 0.80888,
-        "val_std_f1": 0.01892,
-        "train_macro_f1": 0.99713,
-        "overfit_gap": 0.18825,
-        "val_balanced_accuracy": 0.80899,
+        "val_macro_f1": 0.83542,
+        "val_std_f1": 0.0133,
+        "train_macro_f1": 0.99774,
+        "overfit_gap": 0.16232,
+        "val_balanced_accuracy": 0.83176,
         "per_class_f1": {
-          "nasal": 0.8168,
-          "oral": 0.8013
+          "1": 0.9052,
+          "2": 0.7656
         },
-        "worst_class_label": "oral",
-        "worst_class_f1": 0.8013,
-        "best_class_f1": 0.8168,
+        "worst_class_label": "2",
+        "worst_class_f1": 0.7656,
+        "best_class_f1": 0.9052,
         "top_confused_pairs": [
           {
-            "true_class": "oral",
-            "predicted_class": "nasal",
-            "error_count": 93,
-            "error_rate_within_true_class": 0.2013
+            "true_class": "2",
+            "predicted_class": "1",
+            "error_count": 146,
+            "error_rate_within_true_class": 0.2487
           },
           {
-            "true_class": "nasal",
-            "predicted_class": "oral",
-            "error_count": 90,
-            "error_rate_within_true_class": 0.1807
+            "true_class": "1",
+            "predicted_class": "2",
+            "error_count": 124,
+            "error_rate_within_true_class": 0.0878
           }
         ],
         "top_features": [
-          "engineered_feat_9 (0.076)",
-          "engineered_feat_23 (0.050)",
-          "engineered_feat_17 (0.048)",
-          "formant_freq_1 (0.048)",
-          "engineered_feat_10 (0.048)"
+          "V4 (0.213)",
+          "engineered_feat_14 (0.101)",
+          "V3 (0.076)",
+          "engineered_feat_9 (0.065)",
+          "V2 (0.051)"
         ],
         "primary_pathology": "severe_overfitting",
-        "diagnostic_summary_text": "Val Macro-F1=0.8089 (±0.0189), Train Macro-F1=0.9971 (Overfit Gap=+0.1883). Worst Class='oral' (F1=0.8013 vs Best=0.8168). Top Confusion: oral->nasal (93 errors). Primary Pathology: severe_overfitting."
+        "diagnostic_summary_text": "Val Macro-F1=0.8354 (±0.0133), Train Macro-F1=0.9977 (Overfit Gap=+0.1623). Worst Class='2' (F1=0.7656 vs Best=0.9052). Top Confusion: 2->1 (146 errors). Primary Pathology: severe_overfitting."
       },
-      "best_val_macro_f1_so_far": 0.80995,
-      "elapsed_seconds": 1.6599,
+      "best_val_macro_f1_so_far": 0.83579,
+      "elapsed_seconds": 1.9768,
       "agent_decision": {
-        "bottleneck_diagnosis": "Best validation score is 0.8099 with worst class 'oral' (F1=0.8013). Depth-wise gradient boosting (`xgboost`) with engineered interactions has not been tested.",
-        "scientific_hypothesis": "If we test `xgboost` (depth=5, lr=0.08, reg_lambda=3.0) combined with `ratios_top5` feature interactions and `robust` scaling, non-linear boundaries between confused classes will sharpen.",
+        "bottleneck_diagnosis": "Best validation score is 0.8358 with worst class '2' (F1=0.7667). Depth-wise gradient boosting (`xgboost`) with engineered interactions has not been tested.",
+        "scientific_hypothesis": "If we test `xgboost` (depth=5, lr=0.08, reg_lambda=3.0) combined with `poly_top5` feature interactions and `robust` scaling, non-linear boundaries between confused classes will sharpen.",
         "expected_outcome": "Outperform catboost baseline by at least +0.01 in Macro-F1 via non-linear feature combinations.",
         "exploration_mode": "explore_new_family",
         "changed_components": [
           "scaler: none -> robust",
-          "feature_engineering: none -> ratios_top5",
+          "feature_engineering: none -> poly_top5",
           "model_family: catboost -> xgboost",
-          "max_depth: 4 -> 5",
-          "regularization: 12.0 -> 3.0",
-          "subsample: 0.8 -> 0.85",
-          "min_samples_leaf: 4 -> 2"
+          "max_depth: 6 -> 5",
+          "min_samples_leaf: 1 -> 2"
         ],
         "config": {
           "imputer": "median",
           "scaler": "robust",
           "categorical_encoder": "onehot",
-          "feature_engineering": "ratios_top5",
-          "imbalance_strategy": "none",
-          "threshold_tuning": false,
+          "feature_engineering": "poly_top5",
+          "imbalance_strategy": "class_weight_balanced",
+          "threshold_tuning": true,
           "model_family": "xgboost",
           "n_estimators": 250,
           "max_depth": 5,
@@ -583,8 +493,99 @@
         "token_usage": null
       },
       "was_new_best": false,
-      "observed_outcome": "REFUTED/SUB-PEAK: Val Macro-F1=0.8089 (-0.0011 vs peak 0.8099), Overfit Gap=+0.1883.",
+      "observed_outcome": "REFUTED/SUB-PEAK: Val Macro-F1=0.8354 (-0.0004 vs peak 0.8358), Overfit Gap=+0.1623.",
       "hypothesis_confirmed": false,
+      "token_usage": null
+    },
+    {
+      "trial_index": 5,
+      "strategy_name": "SEVA (Heuristic Agent)",
+      "dataset_name": "phoneme",
+      "seed": 42,
+      "config": {
+        "imputer": "median",
+        "scaler": "standard",
+        "categorical_encoder": "onehot",
+        "feature_engineering": "ratios_top5",
+        "imbalance_strategy": "class_weight_balanced",
+        "threshold_tuning": true,
+        "model_family": "catboost",
+        "n_estimators": 250,
+        "max_depth": 6,
+        "learning_rate": 0.08,
+        "regularization": 3.0,
+        "subsample": 0.85,
+        "min_samples_leaf": 1
+      },
+      "config_hash": "297b37e7bd41",
+      "diagnostics": {
+        "val_macro_f1": 0.85196,
+        "val_std_f1": 0.00565,
+        "train_macro_f1": 0.99412,
+        "overfit_gap": 0.14216,
+        "val_balanced_accuracy": 0.84715,
+        "per_class_f1": {
+          "1": 0.9152,
+          "2": 0.7888
+        },
+        "worst_class_label": "2",
+        "worst_class_f1": 0.7888,
+        "best_class_f1": 0.9152,
+        "top_confused_pairs": [
+          {
+            "true_class": "2",
+            "predicted_class": "1",
+            "error_count": 135,
+            "error_rate_within_true_class": 0.23
+          },
+          {
+            "true_class": "1",
+            "predicted_class": "2",
+            "error_count": 107,
+            "error_rate_within_true_class": 0.0757
+          }
+        ],
+        "top_features": [
+          "engineered_feat_14 (7.206)",
+          "engineered_feat_21 (6.537)",
+          "engineered_feat_20 (5.987)",
+          "V1 (5.790)",
+          "engineered_feat_19 (5.052)"
+        ],
+        "primary_pathology": "severe_overfitting",
+        "diagnostic_summary_text": "Val Macro-F1=0.8520 (±0.0056), Train Macro-F1=0.9941 (Overfit Gap=+0.1422). Worst Class='2' (F1=0.7888 vs Best=0.9152). Top Confusion: 2->1 (135 errors). Primary Pathology: severe_overfitting."
+      },
+      "best_val_macro_f1_so_far": 0.85196,
+      "elapsed_seconds": 14.5603,
+      "agent_decision": {
+        "bottleneck_diagnosis": "Representation bottleneck on Trial #2 (Val F1=0.8358, top confusion: '2' misclassified as '1' (145 errors, 24.7%)).",
+        "scientific_hypothesis": "If we apply `ratios_top5` feature engineering with `standard` scaling while keeping the winning `catboost` backbone, Macro-F1 will improve because: Non-linear ratio and difference interactions among top-5 F-value features capture relative magnitudes between confused classes.",
+        "expected_outcome": "Increase Val Macro-F1 above 0.8358 by reducing representation noise.",
+        "exploration_mode": "exploit_refinement",
+        "changed_components": [
+          "scaler: none -> standard",
+          "feature_engineering: none -> ratios_top5"
+        ],
+        "config": {
+          "imputer": "median",
+          "scaler": "standard",
+          "categorical_encoder": "onehot",
+          "feature_engineering": "ratios_top5",
+          "imbalance_strategy": "class_weight_balanced",
+          "threshold_tuning": true,
+          "model_family": "catboost",
+          "n_estimators": 250,
+          "max_depth": 6,
+          "learning_rate": 0.08,
+          "regularization": 3.0,
+          "subsample": 0.85,
+          "min_samples_leaf": 1
+        },
+        "token_usage": null
+      },
+      "was_new_best": true,
+      "observed_outcome": "CONFIRMED: New peak reached. Val Macro-F1=0.8520 (+0.0162 vs prior best), Overfit Gap=+0.1422, Worst Class '2' F1=0.7888.",
+      "hypothesis_confirmed": true,
       "token_usage": null
     }
   ]

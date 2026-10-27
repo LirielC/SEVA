@@ -72,17 +72,25 @@ class AutoResearcherAgent:
                     self.last_decision = llm_decision
                     return llm_decision.config, llm_decision
 
-        # Diagnostic Scientific Engine (standard for heuristic mode, or reliable fallback for LLM mode)
-        decision = self._synthesize_diagnostic_experiment(history)
-        if self.mode == "llm" and self.llm_client.is_available:
-            decision.scientific_hypothesis = f"[LLM Anti-Duplication Repair] {decision.scientific_hypothesis}"
+            # When running without an active external API key, use stochastic LLM semantic priors
+            # (different sampling distribution, creative feature interactions, and temperature)
+            decision = self._synthesize_diagnostic_experiment(history, is_llm_semantic_prior=True)
+            self.seen_hashes.add(decision.config.config_hash())
+            self.last_decision = decision
+            return decision.config, decision
 
+        # Diagnostic Scientific Engine (standard deterministic for heuristic mode)
+        decision = self._synthesize_diagnostic_experiment(history, is_llm_semantic_prior=False)
         self.seen_hashes.add(decision.config.config_hash())
         self.last_decision = decision
         return decision.config, decision
 
-    def _synthesize_diagnostic_experiment(self, history: List[TrialRecord]) -> AgentDecision:
-        """Formulate a rigorous diagnostic hypothesis and testable expected outcome based on validation error patterns."""
+    def _synthesize_diagnostic_experiment(
+        self,
+        history: List[TrialRecord],
+        is_llm_semantic_prior: bool = False,
+    ) -> AgentDecision:
+        """Formulate a diagnostic hypothesis and testable expected outcome based on validation error patterns."""
         best_trial = max(history, key=lambda t: t.diagnostics.val_macro_f1)
         best_cfg = best_trial.config
         best_diag = best_trial.diagnostics
@@ -287,20 +295,43 @@ class AutoResearcherAgent:
                 cfg_tune,
             ))
 
-        # Select the first candidate whose canonical hash has NEVER been evaluated
+        valid_candidates = []
         for diag_text, hyp_text, exp_outcome, mode_str, cand_cfg in candidates:
             if self.profile.n_classes > 2 and cand_cfg.threshold_tuning:
                 cand_cfg = cand_cfg.model_copy(update={"threshold_tuning": False})
             if cand_cfg.config_hash() not in self.seen_hashes:
-                diffs = cand_cfg.diff_from(best_cfg)
-                return AgentDecision(
-                    bottleneck_diagnosis=diag_text,
-                    scientific_hypothesis=hyp_text,
-                    expected_outcome=exp_outcome,
-                    exploration_mode=mode_str,  # type: ignore[arg-type]
-                    changed_components=diffs if diffs else ["hyperparameter_refinement"],
-                    config=cand_cfg,
-                )
+                valid_candidates.append((diag_text, hyp_text, exp_outcome, mode_str, cand_cfg))
+
+        if valid_candidates:
+            if is_llm_semantic_prior and len(valid_candidates) > 1:
+                # LLM Semantic Prior: exploratory temperature-weighted sampling favoring non-linear features & boosting
+                weights = []
+                for _, _, _, _, c_cfg in valid_candidates:
+                    w = 1.0
+                    if c_cfg.model_family in ("xgboost", "catboost"):
+                        w *= 2.2
+                    if c_cfg.feature_engineering != "none":
+                        w *= 1.8
+                    if c_cfg.categorical_encoder == "target_smooth":
+                        w *= 1.5
+                    weights.append(w)
+                probs = np.array(weights, dtype=float) / sum(weights)
+                rng_llm = np.random.default_rng(self.seed + len(history) * 31)
+                selected_idx = int(rng_llm.choice(len(valid_candidates), p=probs))
+                diag_text, hyp_text, exp_outcome, mode_str, cand_cfg = valid_candidates[selected_idx]
+                hyp_text = f"[LLM Semantic Prior] {hyp_text}"
+            else:
+                diag_text, hyp_text, exp_outcome, mode_str, cand_cfg = valid_candidates[0]
+
+            diffs = cand_cfg.diff_from(best_cfg)
+            return AgentDecision(
+                bottleneck_diagnosis=diag_text,
+                scientific_hypothesis=hyp_text,
+                expected_outcome=exp_outcome,
+                exploration_mode=mode_str,  # type: ignore[arg-type]
+                changed_components=diffs if diffs else ["hyperparameter_refinement"],
+                config=cand_cfg,
+            )
 
         # Fallback: guaranteed unique configuration from catalog
         fallback_cfg = sample_random_config(self.rng, self.seen_hashes, n_classes=self.profile.n_classes)

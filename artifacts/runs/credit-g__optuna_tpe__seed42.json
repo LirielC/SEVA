@@ -3,31 +3,31 @@
   "dataset_name": "credit-g",
   "seed": 42,
   "budget": 6,
-  "best_val_macro_f1": 0.89688,
-  "holdout_test_macro_f1": 0.88945,
-  "baseline_val_macro_f1": 0.85045,
-  "improvement_over_baseline": 0.04643,
-  "trials_to_95pct_peak": 1,
-  "trials_to_target_threshold": 1,
-  "auc_convergence": 0.88914,
-  "total_elapsed_seconds": 33.9438,
+  "best_val_macro_f1": 0.69429,
+  "holdout_test_macro_f1": 0.67552,
+  "baseline_val_macro_f1": 0.65721,
+  "improvement_over_baseline": 0.03708,
+  "trials_to_95pct_peak": 4,
+  "trials_to_target_threshold": 4,
+  "auc_convergence": 0.674,
+  "total_elapsed_seconds": 12.8976,
   "total_llm_tokens": 0,
   "total_llm_cost_usd": 0.0,
   "total_llm_calls": 0,
   "best_config": {
-    "imputer": "mean",
-    "scaler": "none",
-    "categorical_encoder": "ordinal",
-    "feature_engineering": "ratios_top5",
-    "imbalance_strategy": "random_undersample",
+    "imputer": "median",
+    "scaler": "standard",
+    "categorical_encoder": "target_smooth",
+    "feature_engineering": "mutual_info_k80",
+    "imbalance_strategy": "random_oversample",
     "threshold_tuning": false,
     "model_family": "random_forest",
-    "n_estimators": 180,
-    "max_depth": 10,
-    "learning_rate": 0.03,
-    "regularization": 6.0,
+    "n_estimators": 120,
+    "max_depth": 5,
+    "learning_rate": 0.05,
+    "regularization": 1.0,
     "subsample": 0.7,
-    "min_samples_leaf": 2
+    "min_samples_leaf": 8
   },
   "trials": [
     {
@@ -52,44 +52,44 @@
       },
       "config_hash": "b8f37a49ce80",
       "diagnostics": {
-        "val_macro_f1": 0.85045,
-        "val_std_f1": 0.03951,
-        "train_macro_f1": 0.99521,
-        "overfit_gap": 0.14476,
-        "val_balanced_accuracy": 0.8268,
+        "val_macro_f1": 0.65721,
+        "val_std_f1": 0.05412,
+        "train_macro_f1": 0.97062,
+        "overfit_gap": 0.31341,
+        "val_balanced_accuracy": 0.64435,
         "per_class_f1": {
-          "bad": 0.7822,
-          "good": 0.9207
+          "bad": 0.4712,
+          "good": 0.8437
         },
         "worst_class_label": "bad",
-        "worst_class_f1": 0.7822,
-        "best_class_f1": 0.9207,
+        "worst_class_f1": 0.4712,
+        "best_class_f1": 0.8437,
         "top_confused_pairs": [
           {
             "true_class": "bad",
             "predicted_class": "good",
-            "error_count": 79,
-            "error_rate_within_true_class": 0.3211
+            "error_count": 154,
+            "error_rate_within_true_class": 0.6417
           },
           {
             "true_class": "good",
             "predicted_class": "bad",
-            "error_count": 14,
-            "error_rate_within_true_class": 0.0253
+            "error_count": 39,
+            "error_rate_within_true_class": 0.0696
           }
         ],
         "top_features": [
-          "num_feat_9 (0.164)",
-          "num_feat_6 (0.119)",
-          "num_feat_11 (0.119)",
-          "num_feat_7 (0.099)",
-          "num_feat_5 (0.094)"
+          "duration (0.093)",
+          "checking_status (0.081)",
+          "credit_amount (0.072)",
+          "residence_since (0.069)",
+          "personal_status (0.043)"
         ],
-        "primary_pathology": "severe_overfitting",
-        "diagnostic_summary_text": "Val Macro-F1=0.8505 (±0.0395), Train Macro-F1=0.9952 (Overfit Gap=+0.1448). Worst Class='bad' (F1=0.7822 vs Best=0.9207). Top Confusion: bad->good (79 errors). Primary Pathology: severe_overfitting."
+        "primary_pathology": "minority_class_collapse",
+        "diagnostic_summary_text": "Val Macro-F1=0.6572 (±0.0541), Train Macro-F1=0.9706 (Overfit Gap=+0.3134). Worst Class='bad' (F1=0.4712 vs Best=0.8437). Top Confusion: bad->good (154 errors). Primary Pathology: minority_class_collapse."
       },
-      "best_val_macro_f1_so_far": 0.85045,
-      "elapsed_seconds": 0.9119,
+      "best_val_macro_f1_so_far": 0.65721,
+      "elapsed_seconds": 0.9714,
       "agent_decision": null,
       "was_new_best": true,
       "observed_outcome": null,
@@ -118,44 +118,44 @@
       },
       "config_hash": "f0ede94ac34b",
       "diagnostics": {
-        "val_macro_f1": 0.89688,
-        "val_std_f1": 0.02416,
-        "train_macro_f1": 0.94853,
-        "overfit_gap": 0.05165,
-        "val_balanced_accuracy": 0.90903,
+        "val_macro_f1": 0.6639,
+        "val_std_f1": 0.04363,
+        "train_macro_f1": 0.83845,
+        "overfit_gap": 0.17455,
+        "val_balanced_accuracy": 0.69345,
         "per_class_f1": {
-          "bad": 0.861,
-          "good": 0.9335
+          "bad": 0.5763,
+          "good": 0.7525
         },
         "worst_class_label": "bad",
-        "worst_class_f1": 0.861,
-        "best_class_f1": 0.9335,
+        "worst_class_f1": 0.5763,
+        "best_class_f1": 0.7525,
         "top_confused_pairs": [
           {
             "true_class": "good",
             "predicted_class": "bad",
-            "error_count": 49,
-            "error_rate_within_true_class": 0.0884
+            "error_count": 180,
+            "error_rate_within_true_class": 0.3214
           },
           {
             "true_class": "bad",
             "predicted_class": "good",
-            "error_count": 23,
-            "error_rate_within_true_class": 0.0935
+            "error_count": 70,
+            "error_rate_within_true_class": 0.2917
           }
         ],
         "top_features": [
-          "engineered_feat_23 (0.084)",
-          "engineered_feat_29 (0.070)",
-          "engineered_feat_33 (0.064)",
-          "num_feat_5 (0.053)",
-          "num_feat_9 (0.051)"
+          "engineered_feat_20 (0.061)",
+          "engineered_feat_26 (0.047)",
+          "engineered_feat_28 (0.042)",
+          "installment_commitment (0.041)",
+          "engineered_feat_30 (0.041)"
         ],
-        "primary_pathology": "well_balanced_needs_fine_tuning",
-        "diagnostic_summary_text": "Val Macro-F1=0.8969 (±0.0242), Train Macro-F1=0.9485 (Overfit Gap=+0.0517). Worst Class='bad' (F1=0.8610 vs Best=0.9335). Top Confusion: good->bad (49 errors). Primary Pathology: well_balanced_needs_fine_tuning."
+        "primary_pathology": "severe_overfitting",
+        "diagnostic_summary_text": "Val Macro-F1=0.6639 (±0.0436), Train Macro-F1=0.8385 (Overfit Gap=+0.1746). Worst Class='bad' (F1=0.5763 vs Best=0.7525). Top Confusion: good->bad (180 errors). Primary Pathology: severe_overfitting."
       },
-      "best_val_macro_f1_so_far": 0.89688,
-      "elapsed_seconds": 1.4333,
+      "best_val_macro_f1_so_far": 0.6639,
+      "elapsed_seconds": 1.6153,
       "agent_decision": null,
       "was_new_best": true,
       "observed_outcome": null,
@@ -184,44 +184,44 @@
       },
       "config_hash": "925120e2a14b",
       "diagnostics": {
-        "val_macro_f1": 0.86852,
-        "val_std_f1": 0.03163,
+        "val_macro_f1": 0.63763,
+        "val_std_f1": 0.0665,
         "train_macro_f1": 1.0,
-        "overfit_gap": 0.13148,
-        "val_balanced_accuracy": 0.84599,
+        "overfit_gap": 0.36237,
+        "val_balanced_accuracy": 0.62946,
         "per_class_f1": {
-          "bad": 0.8092,
-          "good": 0.9288
+          "bad": 0.4394,
+          "good": 0.8402
         },
         "worst_class_label": "bad",
-        "worst_class_f1": 0.8092,
-        "best_class_f1": 0.9288,
+        "worst_class_f1": 0.4394,
+        "best_class_f1": 0.8402,
         "top_confused_pairs": [
           {
             "true_class": "bad",
             "predicted_class": "good",
-            "error_count": 70,
-            "error_rate_within_true_class": 0.2846
+            "error_count": 162,
+            "error_rate_within_true_class": 0.675
           },
           {
             "true_class": "good",
             "predicted_class": "bad",
-            "error_count": 13,
-            "error_rate_within_true_class": 0.0235
+            "error_count": 37,
+            "error_rate_within_true_class": 0.0661
           }
         ],
         "top_features": [
-          "num_feat_4 (12.946)",
-          "num_feat_7 (12.666)",
-          "num_feat_8 (10.731)",
-          "num_feat_6 (10.060)",
-          "num_feat_5 (9.787)"
+          "savings_status (11.475)",
+          "checking_status (9.125)",
+          "installment_commitment (8.931)",
+          "duration (8.323)",
+          "purpose (7.518)"
         ],
-        "primary_pathology": "well_balanced_needs_fine_tuning",
-        "diagnostic_summary_text": "Val Macro-F1=0.8685 (±0.0316), Train Macro-F1=1.0000 (Overfit Gap=+0.1315). Worst Class='bad' (F1=0.8092 vs Best=0.9288). Top Confusion: bad->good (70 errors). Primary Pathology: well_balanced_needs_fine_tuning."
+        "primary_pathology": "severe_overfitting",
+        "diagnostic_summary_text": "Val Macro-F1=0.6376 (±0.0665), Train Macro-F1=1.0000 (Overfit Gap=+0.3624). Worst Class='bad' (F1=0.4394 vs Best=0.8402). Top Confusion: bad->good (162 errors). Primary Pathology: severe_overfitting."
       },
-      "best_val_macro_f1_so_far": 0.89688,
-      "elapsed_seconds": 19.1276,
+      "best_val_macro_f1_so_far": 0.6639,
+      "elapsed_seconds": 4.1497,
       "agent_decision": null,
       "was_new_best": false,
       "observed_outcome": null,
@@ -250,46 +250,46 @@
       },
       "config_hash": "e936dc056171",
       "diagnostics": {
-        "val_macro_f1": 0.8869,
-        "val_std_f1": 0.03543,
-        "train_macro_f1": 0.97165,
-        "overfit_gap": 0.08475,
-        "val_balanced_accuracy": 0.87694,
+        "val_macro_f1": 0.67038,
+        "val_std_f1": 0.04855,
+        "train_macro_f1": 0.91964,
+        "overfit_gap": 0.24926,
+        "val_balanced_accuracy": 0.66637,
         "per_class_f1": {
-          "bad": 0.8401,
-          "good": 0.9337
+          "bad": 0.5295,
+          "good": 0.8119
         },
         "worst_class_label": "bad",
-        "worst_class_f1": 0.8401,
-        "best_class_f1": 0.9337,
+        "worst_class_f1": 0.5295,
+        "best_class_f1": 0.8119,
         "top_confused_pairs": [
           {
             "true_class": "bad",
             "predicted_class": "good",
-            "error_count": 49,
-            "error_rate_within_true_class": 0.1992
+            "error_count": 119,
+            "error_rate_within_true_class": 0.4958
           },
           {
             "true_class": "good",
             "predicted_class": "bad",
-            "error_count": 26,
-            "error_rate_within_true_class": 0.0469
+            "error_count": 96,
+            "error_rate_within_true_class": 0.1714
           }
         ],
         "top_features": [
-          "num_feat_7 (0.135)",
-          "num_feat_6 (0.130)",
-          "num_feat_4 (0.125)",
-          "num_feat_9 (0.124)",
-          "num_feat_5 (0.098)"
+          "installment_commitment (0.087)",
+          "savings_status (0.085)",
+          "credit_amount (0.084)",
+          "housing (0.079)",
+          "age (0.073)"
         ],
-        "primary_pathology": "well_balanced_needs_fine_tuning",
-        "diagnostic_summary_text": "Val Macro-F1=0.8869 (±0.0354), Train Macro-F1=0.9717 (Overfit Gap=+0.0848). Worst Class='bad' (F1=0.8401 vs Best=0.9337). Top Confusion: bad->good (49 errors). Primary Pathology: well_balanced_needs_fine_tuning."
+        "primary_pathology": "severe_overfitting",
+        "diagnostic_summary_text": "Val Macro-F1=0.6704 (±0.0486), Train Macro-F1=0.9196 (Overfit Gap=+0.2493). Worst Class='bad' (F1=0.5295 vs Best=0.8119). Top Confusion: bad->good (119 errors). Primary Pathology: severe_overfitting."
       },
-      "best_val_macro_f1_so_far": 0.89688,
-      "elapsed_seconds": 0.8086,
+      "best_val_macro_f1_so_far": 0.67038,
+      "elapsed_seconds": 0.7263,
       "agent_decision": null,
-      "was_new_best": false,
+      "was_new_best": true,
       "observed_outcome": null,
       "hypothesis_confirmed": null,
       "token_usage": null
@@ -316,46 +316,46 @@
       },
       "config_hash": "f0ec6e40122a",
       "diagnostics": {
-        "val_macro_f1": 0.8749,
-        "val_std_f1": 0.05075,
-        "train_macro_f1": 0.92308,
-        "overfit_gap": 0.04818,
-        "val_balanced_accuracy": 0.88668,
+        "val_macro_f1": 0.69429,
+        "val_std_f1": 0.05112,
+        "train_macro_f1": 0.76823,
+        "overfit_gap": 0.07394,
+        "val_balanced_accuracy": 0.7244,
         "per_class_f1": {
-          "bad": 0.8308,
-          "good": 0.9185
+          "bad": 0.6117,
+          "good": 0.778
         },
         "worst_class_label": "bad",
-        "worst_class_f1": 0.8308,
-        "best_class_f1": 0.9185,
+        "worst_class_f1": 0.6117,
+        "best_class_f1": 0.778,
         "top_confused_pairs": [
           {
             "true_class": "good",
             "predicted_class": "bad",
-            "error_count": 58,
-            "error_rate_within_true_class": 0.1047
+            "error_count": 164,
+            "error_rate_within_true_class": 0.2929
           },
           {
             "true_class": "bad",
             "predicted_class": "good",
-            "error_count": 30,
-            "error_rate_within_true_class": 0.122
+            "error_count": 62,
+            "error_rate_within_true_class": 0.2583
           }
         ],
         "top_features": [
-          "num_feat_8 (0.159)",
-          "num_feat_6 (0.159)",
-          "num_feat_4 (0.138)",
-          "num_feat_3 (0.127)",
-          "num_feat_5 (0.119)"
+          "savings_status (0.217)",
+          "purpose (0.110)",
+          "checking_status (0.100)",
+          "installment_commitment (0.098)",
+          "duration (0.098)"
         ],
         "primary_pathology": "well_balanced_needs_fine_tuning",
-        "diagnostic_summary_text": "Val Macro-F1=0.8749 (±0.0508), Train Macro-F1=0.9231 (Overfit Gap=+0.0482). Worst Class='bad' (F1=0.8308 vs Best=0.9185). Top Confusion: good->bad (58 errors). Primary Pathology: well_balanced_needs_fine_tuning."
+        "diagnostic_summary_text": "Val Macro-F1=0.6943 (±0.0511), Train Macro-F1=0.7682 (Overfit Gap=+0.0739). Worst Class='bad' (F1=0.6117 vs Best=0.7780). Top Confusion: good->bad (164 errors). Primary Pathology: well_balanced_needs_fine_tuning."
       },
-      "best_val_macro_f1_so_far": 0.89688,
-      "elapsed_seconds": 1.0573,
+      "best_val_macro_f1_so_far": 0.69429,
+      "elapsed_seconds": 1.0806,
       "agent_decision": null,
-      "was_new_best": false,
+      "was_new_best": true,
       "observed_outcome": null,
       "hypothesis_confirmed": null,
       "token_usage": null
@@ -382,44 +382,44 @@
       },
       "config_hash": "ac31d8a19d50",
       "diagnostics": {
-        "val_macro_f1": 0.88183,
-        "val_std_f1": 0.0383,
+        "val_macro_f1": 0.59829,
+        "val_std_f1": 0.06863,
         "train_macro_f1": 1.0,
-        "overfit_gap": 0.11817,
-        "val_balanced_accuracy": 0.85999,
+        "overfit_gap": 0.40171,
+        "val_balanced_accuracy": 0.6006,
         "per_class_f1": {
-          "bad": 0.8292,
-          "good": 0.9354
+          "bad": 0.3642,
+          "good": 0.8386
         },
         "worst_class_label": "bad",
-        "worst_class_f1": 0.8292,
-        "best_class_f1": 0.9354,
+        "worst_class_f1": 0.3642,
+        "best_class_f1": 0.8386,
         "top_confused_pairs": [
           {
             "true_class": "bad",
             "predicted_class": "good",
-            "error_count": 64,
-            "error_rate_within_true_class": 0.2602
+            "error_count": 181,
+            "error_rate_within_true_class": 0.7542
           },
           {
             "true_class": "good",
             "predicted_class": "bad",
-            "error_count": 11,
-            "error_rate_within_true_class": 0.0199
+            "error_count": 25,
+            "error_rate_within_true_class": 0.0446
           }
         ],
         "top_features": [
-          "num_feat_5 (9.194)",
-          "num_feat_9 (6.839)",
-          "engineered_feat_24 (5.595)",
-          "num_feat_11 (4.912)",
-          "num_feat_7 (4.764)"
+          "credit_amount (4.835)",
+          "engineered_feat_30 (4.447)",
+          "engineered_feat_31 (3.971)",
+          "engineered_feat_23 (3.892)",
+          "engineered_feat_20 (3.854)"
         ],
-        "primary_pathology": "well_balanced_needs_fine_tuning",
-        "diagnostic_summary_text": "Val Macro-F1=0.8818 (±0.0383), Train Macro-F1=1.0000 (Overfit Gap=+0.1182). Worst Class='bad' (F1=0.8292 vs Best=0.9354). Top Confusion: bad->good (64 errors). Primary Pathology: well_balanced_needs_fine_tuning."
+        "primary_pathology": "minority_class_collapse",
+        "diagnostic_summary_text": "Val Macro-F1=0.5983 (±0.0686), Train Macro-F1=1.0000 (Overfit Gap=+0.4017). Worst Class='bad' (F1=0.3642 vs Best=0.8386). Top Confusion: bad->good (181 errors). Primary Pathology: minority_class_collapse."
       },
-      "best_val_macro_f1_so_far": 0.89688,
-      "elapsed_seconds": 10.3301,
+      "best_val_macro_f1_so_far": 0.69429,
+      "elapsed_seconds": 4.147,
       "agent_decision": null,
       "was_new_best": false,
       "observed_outcome": null,

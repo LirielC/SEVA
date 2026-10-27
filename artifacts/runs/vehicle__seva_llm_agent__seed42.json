@@ -3,30 +3,30 @@
   "dataset_name": "vehicle",
   "seed": 42,
   "budget": 6,
-  "best_val_macro_f1": 0.89045,
-  "holdout_test_macro_f1": 0.90135,
-  "baseline_val_macro_f1": 0.85365,
-  "improvement_over_baseline": 0.0368,
-  "trials_to_95pct_peak": 2,
-  "trials_to_target_threshold": 2,
-  "auc_convergence": 0.87818,
-  "total_elapsed_seconds": 173.938,
+  "best_val_macro_f1": 0.77742,
+  "holdout_test_macro_f1": 0.74319,
+  "baseline_val_macro_f1": 0.7368,
+  "improvement_over_baseline": 0.04062,
+  "trials_to_95pct_peak": 5,
+  "trials_to_target_threshold": 5,
+  "auc_convergence": 0.75703,
+  "total_elapsed_seconds": 59.194,
   "total_llm_tokens": 0,
   "total_llm_cost_usd": 0.0,
   "total_llm_calls": 0,
   "best_config": {
     "imputer": "median",
-    "scaler": "none",
+    "scaler": "standard",
     "categorical_encoder": "onehot",
-    "feature_engineering": "none",
+    "feature_engineering": "tree_importance_k75",
     "imbalance_strategy": "none",
     "threshold_tuning": false,
-    "model_family": "catboost",
-    "n_estimators": 250,
+    "model_family": "xgboost",
+    "n_estimators": 350,
     "max_depth": 6,
-    "learning_rate": 0.08,
-    "regularization": 3.0,
-    "subsample": 0.85,
+    "learning_rate": 0.05,
+    "regularization": 1.0,
+    "subsample": 1.0,
     "min_samples_leaf": 1
   },
   "trials": [
@@ -52,54 +52,54 @@
       },
       "config_hash": "b8f37a49ce80",
       "diagnostics": {
-        "val_macro_f1": 0.85365,
-        "val_std_f1": 0.03237,
-        "train_macro_f1": 0.99889,
-        "overfit_gap": 0.14524,
-        "val_balanced_accuracy": 0.85364,
+        "val_macro_f1": 0.7368,
+        "val_std_f1": 0.02134,
+        "train_macro_f1": 1.0,
+        "overfit_gap": 0.2632,
+        "val_balanced_accuracy": 0.74702,
         "per_class_f1": {
-          "bus": 0.8623,
-          "opel": 0.8529,
-          "saab": 0.858,
-          "van": 0.8415
+          "bus": 0.958,
+          "opel": 0.5377,
+          "saab": 0.5527,
+          "van": 0.9027
         },
-        "worst_class_label": "van",
-        "worst_class_f1": 0.8415,
-        "best_class_f1": 0.8623,
+        "worst_class_label": "opel",
+        "worst_class_f1": 0.5377,
+        "best_class_f1": 0.958,
         "top_confused_pairs": [
           {
             "true_class": "opel",
-            "predicted_class": "van",
-            "error_count": 15,
-            "error_rate_within_true_class": 0.0882
+            "predicted_class": "saab",
+            "error_count": 77,
+            "error_rate_within_true_class": 0.4529
           },
           {
             "true_class": "saab",
-            "predicted_class": "bus",
-            "error_count": 13,
-            "error_rate_within_true_class": 0.0769
+            "predicted_class": "opel",
+            "error_count": 53,
+            "error_rate_within_true_class": 0.3064
           },
           {
-            "true_class": "van",
-            "predicted_class": "opel",
-            "error_count": 11,
-            "error_rate_within_true_class": 0.0643
+            "true_class": "saab",
+            "predicted_class": "van",
+            "error_count": 15,
+            "error_rate_within_true_class": 0.0867
           }
         ],
         "top_features": [
-          "shape_metric_17 (0.096)",
-          "shape_metric_11 (0.093)",
-          "shape_metric_3 (0.089)",
-          "shape_metric_9 (0.081)",
-          "shape_metric_12 (0.070)"
+          "MAX.LENGTH_ASPECT_RATIO (0.122)",
+          "SCALED_VARIANCE_MINOR (0.085)",
+          "MAX.LENGTH_RECTANGULARITY (0.073)",
+          "SCALED_VARIANCE_MAJOR (0.067)",
+          "ELONGATEDNESS (0.066)"
         ],
         "primary_pathology": "severe_overfitting",
-        "diagnostic_summary_text": "Val Macro-F1=0.8537 (±0.0324), Train Macro-F1=0.9989 (Overfit Gap=+0.1452). Worst Class='van' (F1=0.8415 vs Best=0.8623). Top Confusion: opel->van (15 errors). Primary Pathology: severe_overfitting."
+        "diagnostic_summary_text": "Val Macro-F1=0.7368 (±0.0213), Train Macro-F1=1.0000 (Overfit Gap=+0.2632). Worst Class='opel' (F1=0.5377 vs Best=0.9580). Top Confusion: opel->saab (77 errors). Primary Pathology: severe_overfitting."
       },
-      "best_val_macro_f1_so_far": 0.85365,
-      "elapsed_seconds": 0.9748,
+      "best_val_macro_f1_so_far": 0.7368,
+      "elapsed_seconds": 1.0675,
       "agent_decision": {
-        "bottleneck_diagnosis": "Initial state on 'vehicle' (676 dev rows, 18 numeric & 0 categorical features, imbalance_ratio=1.03). No model metrics collected yet.",
+        "bottleneck_diagnosis": "Initial state on 'vehicle' (676 dev rows, 18 numeric & 0 categorical features, imbalance_ratio=1.09). No model metrics collected yet.",
         "scientific_hypothesis": "Establish a reference anchor using an unregularized RandomForest baseline (depth=10, OneHot encoding, no class balancing) to expose dataset pathologies (overfitting gap, minority class recall, and confused class pairs).",
         "expected_outcome": "Establish benchmark anchor and compute baseline error distribution across all classes.",
         "exploration_mode": "baseline",
@@ -124,7 +124,7 @@
         "token_usage": null
       },
       "was_new_best": true,
-      "observed_outcome": "Baseline established: Val Macro-F1=0.8537, Overfit Gap=+0.1452, Worst Class F1=0.8415.",
+      "observed_outcome": "Baseline established: Val Macro-F1=0.7368, Overfit Gap=+0.2632, Worst Class F1=0.5377.",
       "hypothesis_confirmed": true,
       "token_usage": null
     },
@@ -135,98 +135,96 @@
       "seed": 42,
       "config": {
         "imputer": "median",
-        "scaler": "none",
+        "scaler": "standard",
         "categorical_encoder": "onehot",
-        "feature_engineering": "none",
+        "feature_engineering": "tree_importance_k75",
         "imbalance_strategy": "none",
         "threshold_tuning": false,
         "model_family": "random_forest",
         "n_estimators": 100,
-        "max_depth": 7,
+        "max_depth": 10,
         "learning_rate": 0.1,
-        "regularization": 6.0,
-        "subsample": 0.8,
-        "min_samples_leaf": 4
+        "regularization": 1.0,
+        "subsample": 1.0,
+        "min_samples_leaf": 1
       },
-      "config_hash": "559d98b23b60",
+      "config_hash": "303797c51d5c",
       "diagnostics": {
-        "val_macro_f1": 0.8449,
-        "val_std_f1": 0.02647,
-        "train_macro_f1": 0.94141,
-        "overfit_gap": 0.09651,
-        "val_balanced_accuracy": 0.84469,
+        "val_macro_f1": 0.7446,
+        "val_std_f1": 0.02182,
+        "train_macro_f1": 0.99964,
+        "overfit_gap": 0.25504,
+        "val_balanced_accuracy": 0.75446,
         "per_class_f1": {
-          "bus": 0.8443,
-          "opel": 0.8487,
-          "saab": 0.8554,
-          "van": 0.8309
+          "bus": 0.9497,
+          "opel": 0.5751,
+          "saab": 0.5621,
+          "van": 0.8921
         },
-        "worst_class_label": "van",
-        "worst_class_f1": 0.8309,
-        "best_class_f1": 0.8554,
+        "worst_class_label": "saab",
+        "worst_class_f1": 0.5621,
+        "best_class_f1": 0.9497,
         "top_confused_pairs": [
           {
             "true_class": "opel",
-            "predicted_class": "van",
-            "error_count": 15,
-            "error_rate_within_true_class": 0.0882
+            "predicted_class": "saab",
+            "error_count": 67,
+            "error_rate_within_true_class": 0.3941
           },
           {
             "true_class": "saab",
-            "predicted_class": "bus",
-            "error_count": 15,
-            "error_rate_within_true_class": 0.0888
+            "predicted_class": "opel",
+            "error_count": 52,
+            "error_rate_within_true_class": 0.3006
           },
           {
-            "true_class": "van",
-            "predicted_class": "opel",
-            "error_count": 14,
-            "error_rate_within_true_class": 0.0819
+            "true_class": "saab",
+            "predicted_class": "van",
+            "error_count": 18,
+            "error_rate_within_true_class": 0.104
           }
         ],
         "top_features": [
-          "shape_metric_11 (0.110)",
-          "shape_metric_17 (0.106)",
-          "shape_metric_3 (0.099)",
-          "shape_metric_9 (0.087)",
-          "shape_metric_12 (0.070)"
+          "PR.AXIS_ASPECT_RATIO (0.104)",
+          "RADIUS_RATIO (0.089)",
+          "PR.AXIS_RECTANGULARITY (0.086)",
+          "MAX.LENGTH_RECTANGULARITY (0.085)",
+          "MAX.LENGTH_ASPECT_RATIO (0.077)"
         ],
-        "primary_pathology": "well_balanced_needs_fine_tuning",
-        "diagnostic_summary_text": "Val Macro-F1=0.8449 (±0.0265), Train Macro-F1=0.9414 (Overfit Gap=+0.0965). Worst Class='van' (F1=0.8309 vs Best=0.8554). Top Confusion: opel->van (15 errors). Primary Pathology: well_balanced_needs_fine_tuning."
+        "primary_pathology": "severe_overfitting",
+        "diagnostic_summary_text": "Val Macro-F1=0.7446 (±0.0218), Train Macro-F1=0.9996 (Overfit Gap=+0.2550). Worst Class='saab' (F1=0.5621 vs Best=0.9497). Top Confusion: opel->saab (67 errors). Primary Pathology: severe_overfitting."
       },
-      "best_val_macro_f1_so_far": 0.85365,
-      "elapsed_seconds": 0.9273,
+      "best_val_macro_f1_so_far": 0.7446,
+      "elapsed_seconds": 1.1533,
       "agent_decision": {
-        "bottleneck_diagnosis": "High variance / overfitting detected in Trial #0: Train Macro-F1=0.9989 vs Val Macro-F1=0.8537 (overfit_gap=+0.1452).",
-        "scientific_hypothesis": "If we constrain tree complexity (`max_depth=7`, `min_samples_leaf=4`), apply stochastic subsampling (`subsample=0.8`), and raise L2 regularization to 6.0, generalization on validation folds will improve.",
-        "expected_outcome": "Reduce overfit_gap from +0.1452 below +0.08 while sustaining or increasing Val Macro-F1.",
+        "bottleneck_diagnosis": "Representation bottleneck on Trial #0 (Val F1=0.7368, top confusion: 'opel' misclassified as 'saab' (77 errors, 45.3%)).",
+        "scientific_hypothesis": "[LLM Semantic Prior] If we apply `tree_importance_k75` feature engineering with `standard` scaling while keeping the winning `random_forest` backbone, Macro-F1 will improve because: Pruning bottom 25% noisy features reduces split variance (current overfit_gap=+0.2632).",
+        "expected_outcome": "Increase Val Macro-F1 above 0.7368 by reducing representation noise.",
         "exploration_mode": "exploit_refinement",
         "changed_components": [
-          "max_depth: 10 -> 7",
-          "regularization: 1.0 -> 6.0",
-          "subsample: 1.0 -> 0.8",
-          "min_samples_leaf: 1 -> 4"
+          "scaler: none -> standard",
+          "feature_engineering: none -> tree_importance_k75"
         ],
         "config": {
           "imputer": "median",
-          "scaler": "none",
+          "scaler": "standard",
           "categorical_encoder": "onehot",
-          "feature_engineering": "none",
+          "feature_engineering": "tree_importance_k75",
           "imbalance_strategy": "none",
           "threshold_tuning": false,
           "model_family": "random_forest",
           "n_estimators": 100,
-          "max_depth": 7,
+          "max_depth": 10,
           "learning_rate": 0.1,
-          "regularization": 6.0,
-          "subsample": 0.8,
-          "min_samples_leaf": 4
+          "regularization": 1.0,
+          "subsample": 1.0,
+          "min_samples_leaf": 1
         },
         "token_usage": null
       },
-      "was_new_best": false,
-      "observed_outcome": "REFUTED/SUB-PEAK: Val Macro-F1=0.8449 (-0.0088 vs peak 0.8537), Overfit Gap=+0.0965.",
-      "hypothesis_confirmed": false,
+      "was_new_best": true,
+      "observed_outcome": "CONFIRMED: New peak reached. Val Macro-F1=0.7446 (+0.0078 vs prior best), Overfit Gap=+0.2550, Worst Class 'saab' F1=0.5621.",
+      "hypothesis_confirmed": true,
       "token_usage": null
     },
     {
@@ -236,99 +234,97 @@
       "seed": 42,
       "config": {
         "imputer": "median",
-        "scaler": "none",
+        "scaler": "standard",
         "categorical_encoder": "onehot",
-        "feature_engineering": "none",
+        "feature_engineering": "tree_importance_k75",
         "imbalance_strategy": "none",
         "threshold_tuning": false,
         "model_family": "catboost",
-        "n_estimators": 250,
-        "max_depth": 6,
-        "learning_rate": 0.08,
-        "regularization": 3.0,
-        "subsample": 0.85,
+        "n_estimators": 350,
+        "max_depth": 8,
+        "learning_rate": 0.05,
+        "regularization": 1.0,
+        "subsample": 1.0,
         "min_samples_leaf": 1
       },
-      "config_hash": "dfac213831c2",
+      "config_hash": "63ceb0a42dba",
       "diagnostics": {
-        "val_macro_f1": 0.89045,
-        "val_std_f1": 0.03579,
-        "train_macro_f1": 0.98739,
-        "overfit_gap": 0.09694,
-        "val_balanced_accuracy": 0.8905,
+        "val_macro_f1": 0.76112,
+        "val_std_f1": 0.02993,
+        "train_macro_f1": 1.0,
+        "overfit_gap": 0.23888,
+        "val_balanced_accuracy": 0.76584,
         "per_class_f1": {
-          "bus": 0.8862,
-          "opel": 0.8994,
-          "saab": 0.8862,
-          "van": 0.8902
+          "bus": 0.9774,
+          "opel": 0.5697,
+          "saab": 0.5748,
+          "van": 0.9235
         },
-        "worst_class_label": "bus",
-        "worst_class_f1": 0.8862,
-        "best_class_f1": 0.8994,
+        "worst_class_label": "opel",
+        "worst_class_f1": 0.5697,
+        "best_class_f1": 0.9774,
         "top_confused_pairs": [
           {
-            "true_class": "saab",
-            "predicted_class": "bus",
-            "error_count": 10,
-            "error_rate_within_true_class": 0.0592
+            "true_class": "opel",
+            "predicted_class": "saab",
+            "error_count": 65,
+            "error_rate_within_true_class": 0.3824
           },
           {
             "true_class": "saab",
+            "predicted_class": "opel",
+            "error_count": 64,
+            "error_rate_within_true_class": 0.3699
+          },
+          {
+            "true_class": "opel",
             "predicted_class": "van",
             "error_count": 8,
-            "error_rate_within_true_class": 0.0473
-          },
-          {
-            "true_class": "van",
-            "predicted_class": "opel",
-            "error_count": 8,
-            "error_rate_within_true_class": 0.0468
+            "error_rate_within_true_class": 0.0471
           }
         ],
         "top_features": [
-          "shape_metric_17 (10.333)",
-          "shape_metric_12 (8.800)",
-          "shape_metric_11 (7.632)",
-          "shape_metric_18 (6.982)",
-          "shape_metric_13 (6.756)"
+          "RADIUS_RATIO (13.878)",
+          "PR.AXIS_ASPECT_RATIO (12.642)",
+          "SCALED_VARIANCE_MINOR (7.945)",
+          "PR.AXIS_RECTANGULARITY (7.859)",
+          "DISTANCE_CIRCULARITY (7.392)"
         ],
-        "primary_pathology": "well_balanced_needs_fine_tuning",
-        "diagnostic_summary_text": "Val Macro-F1=0.8904 (±0.0358), Train Macro-F1=0.9874 (Overfit Gap=+0.0969). Worst Class='bus' (F1=0.8862 vs Best=0.8994). Top Confusion: saab->bus (10 errors). Primary Pathology: well_balanced_needs_fine_tuning."
+        "primary_pathology": "severe_overfitting",
+        "diagnostic_summary_text": "Val Macro-F1=0.7611 (±0.0299), Train Macro-F1=1.0000 (Overfit Gap=+0.2389). Worst Class='opel' (F1=0.5697 vs Best=0.9774). Top Confusion: opel->saab (65 errors). Primary Pathology: severe_overfitting."
       },
-      "best_val_macro_f1_so_far": 0.89045,
-      "elapsed_seconds": 32.7812,
+      "best_val_macro_f1_so_far": 0.76112,
+      "elapsed_seconds": 41.3706,
       "agent_decision": {
-        "bottleneck_diagnosis": "Current best uses 'random_forest' (Val F1=0.8537), leaving symmetric oblivious trees (`catboost`) unexplored. Top confusion is 'opel' misclassified as 'van' (15 errors, 8.8%).",
-        "scientific_hypothesis": "If we switch to `catboost` (250 iterations, depth=6, lr=0.08, L2=3.0) with `onehot` encoding, symmetric decision tables will reduce variance and better separate overlapping decision boundaries.",
-        "expected_outcome": "Achieve Val Macro-F1 higher than current best (0.8537) with decreased error count on top confused pair.",
-        "exploration_mode": "explore_new_family",
+        "bottleneck_diagnosis": "Fine-tuning capacity/regularization trade-off around Trial #1 (Val F1=0.7446, Overfit Gap=+0.2550).",
+        "scientific_hypothesis": "[LLM Semantic Prior] If we update capacity parameters to {'model_family': 'catboost', 'n_estimators': 350, 'learning_rate': 0.05, 'max_depth': 8, 'regularization': 1.0} on `catboost`, we balance bias and variance to reduce the remaining confusion ('opel' misclassified as 'saab' (67 errors, 39.4%)).",
+        "expected_outcome": "Attain peak validation convergence by fine-tuning tree complexity.",
+        "exploration_mode": "exploit_refinement",
         "changed_components": [
           "model_family: random_forest -> catboost",
-          "n_estimators: 100 -> 250",
-          "max_depth: 10 -> 6",
-          "learning_rate: 0.1 -> 0.08",
-          "regularization: 1.0 -> 3.0",
-          "subsample: 1.0 -> 0.85"
+          "n_estimators: 100 -> 350",
+          "max_depth: 10 -> 8",
+          "learning_rate: 0.1 -> 0.05"
         ],
         "config": {
           "imputer": "median",
-          "scaler": "none",
+          "scaler": "standard",
           "categorical_encoder": "onehot",
-          "feature_engineering": "none",
+          "feature_engineering": "tree_importance_k75",
           "imbalance_strategy": "none",
           "threshold_tuning": false,
           "model_family": "catboost",
-          "n_estimators": 250,
-          "max_depth": 6,
-          "learning_rate": 0.08,
-          "regularization": 3.0,
-          "subsample": 0.85,
+          "n_estimators": 350,
+          "max_depth": 8,
+          "learning_rate": 0.05,
+          "regularization": 1.0,
+          "subsample": 1.0,
           "min_samples_leaf": 1
         },
         "token_usage": null
       },
       "was_new_best": true,
-      "observed_outcome": "CONFIRMED: New peak reached. Val Macro-F1=0.8904 (+0.0368 vs prior best), Overfit Gap=+0.0969, Worst Class 'bus' F1=0.8862.",
+      "observed_outcome": "CONFIRMED: New peak reached. Val Macro-F1=0.7611 (+0.0165 vs prior best), Overfit Gap=+0.2389, Worst Class 'opel' F1=0.5697.",
       "hypothesis_confirmed": true,
       "token_usage": null
     },
@@ -339,98 +335,95 @@
       "seed": 42,
       "config": {
         "imputer": "median",
-        "scaler": "robust",
+        "scaler": "standard",
         "categorical_encoder": "onehot",
-        "feature_engineering": "ratios_top5",
+        "feature_engineering": "tree_importance_k75",
         "imbalance_strategy": "none",
         "threshold_tuning": false,
-        "model_family": "xgboost",
-        "n_estimators": 250,
-        "max_depth": 5,
-        "learning_rate": 0.08,
+        "model_family": "catboost",
+        "n_estimators": 350,
+        "max_depth": 6,
+        "learning_rate": 0.05,
         "regularization": 3.0,
-        "subsample": 0.85,
-        "min_samples_leaf": 2
+        "subsample": 1.0,
+        "min_samples_leaf": 1
       },
-      "config_hash": "bc492a6efd15",
+      "config_hash": "63e47032139b",
       "diagnostics": {
-        "val_macro_f1": 0.85505,
-        "val_std_f1": 0.03641,
-        "train_macro_f1": 1.0,
-        "overfit_gap": 0.14495,
-        "val_balanced_accuracy": 0.85513,
+        "val_macro_f1": 0.74804,
+        "val_std_f1": 0.03413,
+        "train_macro_f1": 0.97873,
+        "overfit_gap": 0.23069,
+        "val_balanced_accuracy": 0.75448,
         "per_class_f1": {
-          "bus": 0.8649,
-          "opel": 0.8393,
-          "saab": 0.8673,
-          "van": 0.8488
+          "bus": 0.9577,
+          "opel": 0.5566,
+          "saab": 0.5562,
+          "van": 0.9217
         },
-        "worst_class_label": "opel",
-        "worst_class_f1": 0.8393,
-        "best_class_f1": 0.8673,
+        "worst_class_label": "saab",
+        "worst_class_f1": 0.5562,
+        "best_class_f1": 0.9577,
         "top_confused_pairs": [
           {
-            "true_class": "van",
-            "predicted_class": "opel",
-            "error_count": 14,
-            "error_rate_within_true_class": 0.0819
-          },
-          {
             "true_class": "opel",
-            "predicted_class": "van",
-            "error_count": 13,
-            "error_rate_within_true_class": 0.0765
+            "predicted_class": "saab",
+            "error_count": 68,
+            "error_rate_within_true_class": 0.4
           },
           {
-            "true_class": "bus",
-            "predicted_class": "saab",
+            "true_class": "saab",
+            "predicted_class": "opel",
+            "error_count": 63,
+            "error_rate_within_true_class": 0.3642
+          },
+          {
+            "true_class": "saab",
+            "predicted_class": "van",
             "error_count": 10,
-            "error_rate_within_true_class": 0.0602
+            "error_rate_within_true_class": 0.0578
           }
         ],
         "top_features": [
-          "engineered_feat_23 (0.051)",
-          "engineered_feat_28 (0.051)",
-          "engineered_feat_18 (0.050)",
-          "engineered_feat_34 (0.047)",
-          "engineered_feat_35 (0.045)"
+          "PR.AXIS_ASPECT_RATIO (14.513)",
+          "RADIUS_RATIO (13.903)",
+          "MAX.LENGTH_RECTANGULARITY (8.451)",
+          "PR.AXIS_RECTANGULARITY (7.804)",
+          "DISTANCE_CIRCULARITY (7.331)"
         ],
         "primary_pathology": "severe_overfitting",
-        "diagnostic_summary_text": "Val Macro-F1=0.8550 (±0.0364), Train Macro-F1=1.0000 (Overfit Gap=+0.1449). Worst Class='opel' (F1=0.8393 vs Best=0.8673). Top Confusion: van->opel (14 errors). Primary Pathology: severe_overfitting."
+        "diagnostic_summary_text": "Val Macro-F1=0.7480 (±0.0341), Train Macro-F1=0.9787 (Overfit Gap=+0.2307). Worst Class='saab' (F1=0.5562 vs Best=0.9577). Top Confusion: opel->saab (68 errors). Primary Pathology: severe_overfitting."
       },
-      "best_val_macro_f1_so_far": 0.89045,
-      "elapsed_seconds": 5.5839,
+      "best_val_macro_f1_so_far": 0.76112,
+      "elapsed_seconds": 10.7584,
       "agent_decision": {
-        "bottleneck_diagnosis": "Best validation score is 0.8904 with worst class 'bus' (F1=0.8862). Depth-wise gradient boosting (`xgboost`) with engineered interactions has not been tested.",
-        "scientific_hypothesis": "If we test `xgboost` (depth=5, lr=0.08, reg_lambda=3.0) combined with `ratios_top5` feature interactions and `robust` scaling, non-linear boundaries between confused classes will sharpen.",
-        "expected_outcome": "Outperform catboost baseline by at least +0.01 in Macro-F1 via non-linear feature combinations.",
-        "exploration_mode": "explore_new_family",
+        "bottleneck_diagnosis": "Fine-tuning capacity/regularization trade-off around Trial #2 (Val F1=0.7611, Overfit Gap=+0.2389).",
+        "scientific_hypothesis": "[LLM Semantic Prior] If we update capacity parameters to {'n_estimators': 350, 'learning_rate': 0.05, 'max_depth': 6, 'regularization': 3.0} on `catboost`, we balance bias and variance to reduce the remaining confusion ('opel' misclassified as 'saab' (65 errors, 38.2%)).",
+        "expected_outcome": "Attain peak validation convergence by fine-tuning tree complexity.",
+        "exploration_mode": "exploit_refinement",
         "changed_components": [
-          "scaler: none -> robust",
-          "feature_engineering: none -> ratios_top5",
-          "model_family: catboost -> xgboost",
-          "max_depth: 6 -> 5",
-          "min_samples_leaf: 1 -> 2"
+          "max_depth: 8 -> 6",
+          "regularization: 1.0 -> 3.0"
         ],
         "config": {
           "imputer": "median",
-          "scaler": "robust",
+          "scaler": "standard",
           "categorical_encoder": "onehot",
-          "feature_engineering": "ratios_top5",
+          "feature_engineering": "tree_importance_k75",
           "imbalance_strategy": "none",
           "threshold_tuning": false,
-          "model_family": "xgboost",
-          "n_estimators": 250,
-          "max_depth": 5,
-          "learning_rate": 0.08,
+          "model_family": "catboost",
+          "n_estimators": 350,
+          "max_depth": 6,
+          "learning_rate": 0.05,
           "regularization": 3.0,
-          "subsample": 0.85,
-          "min_samples_leaf": 2
+          "subsample": 1.0,
+          "min_samples_leaf": 1
         },
         "token_usage": null
       },
       "was_new_best": false,
-      "observed_outcome": "REFUTED/SUB-PEAK: Val Macro-F1=0.8550 (-0.0354 vs peak 0.8904), Overfit Gap=+0.1449.",
+      "observed_outcome": "REFUTED/SUB-PEAK: Val Macro-F1=0.7480 (-0.0131 vs peak 0.7611), Overfit Gap=+0.2307.",
       "hypothesis_confirmed": false,
       "token_usage": null
     },
@@ -443,93 +436,95 @@
         "imputer": "median",
         "scaler": "standard",
         "categorical_encoder": "onehot",
-        "feature_engineering": "ratios_top5",
+        "feature_engineering": "tree_importance_k75",
         "imbalance_strategy": "none",
         "threshold_tuning": false,
         "model_family": "catboost",
-        "n_estimators": 250,
-        "max_depth": 6,
+        "n_estimators": 180,
+        "max_depth": 4,
         "learning_rate": 0.08,
-        "regularization": 3.0,
-        "subsample": 0.85,
+        "regularization": 6.0,
+        "subsample": 1.0,
         "min_samples_leaf": 1
       },
-      "config_hash": "ffe312500aaa",
+      "config_hash": "7c8993d9ba29",
       "diagnostics": {
-        "val_macro_f1": 0.85631,
-        "val_std_f1": 0.03538,
-        "train_macro_f1": 0.98372,
-        "overfit_gap": 0.12741,
-        "val_balanced_accuracy": 0.85644,
+        "val_macro_f1": 0.74019,
+        "val_std_f1": 0.03243,
+        "train_macro_f1": 0.89488,
+        "overfit_gap": 0.15469,
+        "val_balanced_accuracy": 0.74999,
         "per_class_f1": {
-          "bus": 0.8624,
-          "opel": 0.864,
-          "saab": 0.848,
-          "van": 0.8523
+          "bus": 0.9418,
+          "opel": 0.566,
+          "saab": 0.5503,
+          "van": 0.9075
         },
         "worst_class_label": "saab",
-        "worst_class_f1": 0.848,
-        "best_class_f1": 0.864,
+        "worst_class_f1": 0.5503,
+        "best_class_f1": 0.9418,
         "top_confused_pairs": [
           {
             "true_class": "opel",
+            "predicted_class": "saab",
+            "error_count": 67,
+            "error_rate_within_true_class": 0.3941
+          },
+          {
+            "true_class": "saab",
+            "predicted_class": "opel",
+            "error_count": 55,
+            "error_rate_within_true_class": 0.3179
+          },
+          {
+            "true_class": "saab",
             "predicted_class": "van",
-            "error_count": 13,
-            "error_rate_within_true_class": 0.0765
-          },
-          {
-            "true_class": "bus",
-            "predicted_class": "saab",
-            "error_count": 11,
-            "error_rate_within_true_class": 0.0663
-          },
-          {
-            "true_class": "van",
-            "predicted_class": "saab",
-            "error_count": 11,
-            "error_rate_within_true_class": 0.0643
+            "error_count": 14,
+            "error_rate_within_true_class": 0.0809
           }
         ],
         "top_features": [
-          "shape_metric_18 (6.538)",
-          "shape_metric_12 (6.208)",
-          "shape_metric_14 (5.893)",
-          "shape_metric_4 (5.072)",
-          "shape_metric_16 (5.032)"
+          "PR.AXIS_ASPECT_RATIO (16.668)",
+          "RADIUS_RATIO (13.736)",
+          "MAX.LENGTH_ASPECT_RATIO (9.661)",
+          "PR.AXIS_RECTANGULARITY (8.341)",
+          "DISTANCE_CIRCULARITY (7.449)"
         ],
-        "primary_pathology": "well_balanced_needs_fine_tuning",
-        "diagnostic_summary_text": "Val Macro-F1=0.8563 (±0.0354), Train Macro-F1=0.9837 (Overfit Gap=+0.1274). Worst Class='saab' (F1=0.8480 vs Best=0.8640). Top Confusion: opel->van (13 errors). Primary Pathology: well_balanced_needs_fine_tuning."
+        "primary_pathology": "severe_overfitting",
+        "diagnostic_summary_text": "Val Macro-F1=0.7402 (±0.0324), Train Macro-F1=0.8949 (Overfit Gap=+0.1547). Worst Class='saab' (F1=0.5503 vs Best=0.9418). Top Confusion: opel->saab (67 errors). Primary Pathology: severe_overfitting."
       },
-      "best_val_macro_f1_so_far": 0.89045,
-      "elapsed_seconds": 67.9064,
+      "best_val_macro_f1_so_far": 0.76112,
+      "elapsed_seconds": 2.0195,
       "agent_decision": {
-        "bottleneck_diagnosis": "Representation bottleneck on Trial #2 (Val F1=0.8904, top confusion: 'saab' misclassified as 'bus' (10 errors, 5.9%)).",
-        "scientific_hypothesis": "If we apply `ratios_top5` feature engineering with `standard` scaling while keeping the winning `catboost` backbone, Macro-F1 will improve because: Non-linear ratio and difference interactions among top-5 F-value features capture relative magnitudes between confused classes.",
-        "expected_outcome": "Increase Val Macro-F1 above 0.8904 by reducing representation noise.",
+        "bottleneck_diagnosis": "Fine-tuning capacity/regularization trade-off around Trial #2 (Val F1=0.7611, Overfit Gap=+0.2389).",
+        "scientific_hypothesis": "[LLM Semantic Prior] If we update capacity parameters to {'n_estimators': 180, 'learning_rate': 0.08, 'max_depth': 4, 'regularization': 6.0} on `catboost`, we balance bias and variance to reduce the remaining confusion ('opel' misclassified as 'saab' (65 errors, 38.2%)).",
+        "expected_outcome": "Attain peak validation convergence by fine-tuning tree complexity.",
         "exploration_mode": "exploit_refinement",
         "changed_components": [
-          "scaler: none -> standard",
-          "feature_engineering: none -> ratios_top5"
+          "n_estimators: 350 -> 180",
+          "max_depth: 8 -> 4",
+          "learning_rate: 0.05 -> 0.08",
+          "regularization: 1.0 -> 6.0"
         ],
         "config": {
           "imputer": "median",
           "scaler": "standard",
           "categorical_encoder": "onehot",
-          "feature_engineering": "ratios_top5",
+          "feature_engineering": "tree_importance_k75",
           "imbalance_strategy": "none",
           "threshold_tuning": false,
           "model_family": "catboost",
-          "n_estimators": 250,
-          "max_depth": 6,
+          "n_estimators": 180,
+          "max_depth": 4,
           "learning_rate": 0.08,
-          "regularization": 3.0,
-          "subsample": 0.85,
+          "regularization": 6.0,
+          "subsample": 1.0,
           "min_samples_leaf": 1
         },
         "token_usage": null
       },
       "was_new_best": false,
-      "observed_outcome": "REFUTED/SUB-PEAK: Val Macro-F1=0.8563 (-0.0341 vs peak 0.8904), Overfit Gap=+0.1274.",
+      "observed_outcome": "REFUTED/SUB-PEAK: Val Macro-F1=0.7402 (-0.0209 vs peak 0.7611), Overfit Gap=+0.1547.",
       "hypothesis_confirmed": false,
       "token_usage": null
     },
@@ -540,96 +535,96 @@
       "seed": 42,
       "config": {
         "imputer": "median",
-        "scaler": "robust",
+        "scaler": "standard",
         "categorical_encoder": "onehot",
-        "feature_engineering": "poly_top5",
+        "feature_engineering": "tree_importance_k75",
         "imbalance_strategy": "none",
         "threshold_tuning": false,
-        "model_family": "catboost",
-        "n_estimators": 250,
+        "model_family": "xgboost",
+        "n_estimators": 350,
         "max_depth": 6,
-        "learning_rate": 0.08,
-        "regularization": 3.0,
-        "subsample": 0.85,
+        "learning_rate": 0.05,
+        "regularization": 1.0,
+        "subsample": 1.0,
         "min_samples_leaf": 1
       },
-      "config_hash": "7b8866239a0e",
+      "config_hash": "3fd730671c14",
       "diagnostics": {
-        "val_macro_f1": 0.85873,
-        "val_std_f1": 0.02963,
-        "train_macro_f1": 0.98925,
-        "overfit_gap": 0.13052,
-        "val_balanced_accuracy": 0.85816,
+        "val_macro_f1": 0.77742,
+        "val_std_f1": 0.00967,
+        "train_macro_f1": 1.0,
+        "overfit_gap": 0.22258,
+        "val_balanced_accuracy": 0.7816,
         "per_class_f1": {
-          "bus": 0.8855,
-          "opel": 0.8571,
-          "saab": 0.8521,
-          "van": 0.8382
+          "bus": 0.9607,
+          "opel": 0.6125,
+          "saab": 0.6193,
+          "van": 0.9198
         },
-        "worst_class_label": "van",
-        "worst_class_f1": 0.8382,
-        "best_class_f1": 0.8855,
+        "worst_class_label": "opel",
+        "worst_class_f1": 0.6125,
+        "best_class_f1": 0.9607,
         "top_confused_pairs": [
           {
             "true_class": "opel",
-            "predicted_class": "van",
-            "error_count": 13,
-            "error_rate_within_true_class": 0.0765
-          },
-          {
-            "true_class": "van",
-            "predicted_class": "opel",
-            "error_count": 12,
-            "error_rate_within_true_class": 0.0702
-          },
-          {
-            "true_class": "van",
             "predicted_class": "saab",
-            "error_count": 12,
-            "error_rate_within_true_class": 0.0702
+            "error_count": 63,
+            "error_rate_within_true_class": 0.3706
+          },
+          {
+            "true_class": "saab",
+            "predicted_class": "opel",
+            "error_count": 49,
+            "error_rate_within_true_class": 0.2832
+          },
+          {
+            "true_class": "saab",
+            "predicted_class": "van",
+            "error_count": 10,
+            "error_rate_within_true_class": 0.0578
           }
         ],
         "top_features": [
-          "shape_metric_12 (7.259)",
-          "shape_metric_17 (6.862)",
-          "shape_metric_16 (6.021)",
-          "shape_metric_14 (5.948)",
-          "shape_metric_18 (5.941)"
+          "SCATTER_RATIO (0.188)",
+          "ELONGATEDNESS (0.131)",
+          "MAX.LENGTH_ASPECT_RATIO (0.111)",
+          "PR.AXIS_ASPECT_RATIO (0.100)",
+          "RADIUS_RATIO (0.081)"
         ],
-        "primary_pathology": "well_balanced_needs_fine_tuning",
-        "diagnostic_summary_text": "Val Macro-F1=0.8587 (±0.0296), Train Macro-F1=0.9892 (Overfit Gap=+0.1305). Worst Class='van' (F1=0.8382 vs Best=0.8855). Top Confusion: opel->van (13 errors). Primary Pathology: well_balanced_needs_fine_tuning."
+        "primary_pathology": "severe_overfitting",
+        "diagnostic_summary_text": "Val Macro-F1=0.7774 (±0.0097), Train Macro-F1=1.0000 (Overfit Gap=+0.2226). Worst Class='opel' (F1=0.6125 vs Best=0.9607). Top Confusion: opel->saab (63 errors). Primary Pathology: severe_overfitting."
       },
-      "best_val_macro_f1_so_far": 0.89045,
-      "elapsed_seconds": 59.1894,
+      "best_val_macro_f1_so_far": 0.77742,
+      "elapsed_seconds": 2.3227,
       "agent_decision": {
-        "bottleneck_diagnosis": "Representation bottleneck on Trial #2 (Val F1=0.8904, top confusion: 'saab' misclassified as 'bus' (10 errors, 5.9%)).",
-        "scientific_hypothesis": "If we apply `poly_top5` feature engineering with `robust` scaling while keeping the winning `catboost` backbone, Macro-F1 will improve because: Second-order polynomial terms (`x_i * x_j`, `x_i^2`) on top informative columns increase boundary expressiveness.",
-        "expected_outcome": "Increase Val Macro-F1 above 0.8904 by reducing representation noise.",
+        "bottleneck_diagnosis": "Fine-tuning capacity/regularization trade-off around Trial #2 (Val F1=0.7611, Overfit Gap=+0.2389).",
+        "scientific_hypothesis": "[LLM Semantic Prior] If we update capacity parameters to {'model_family': 'xgboost', 'n_estimators': 350, 'learning_rate': 0.05, 'max_depth': 6, 'regularization': 1.0} on `xgboost`, we balance bias and variance to reduce the remaining confusion ('opel' misclassified as 'saab' (65 errors, 38.2%)).",
+        "expected_outcome": "Attain peak validation convergence by fine-tuning tree complexity.",
         "exploration_mode": "exploit_refinement",
         "changed_components": [
-          "scaler: none -> robust",
-          "feature_engineering: none -> poly_top5"
+          "model_family: catboost -> xgboost",
+          "max_depth: 8 -> 6"
         ],
         "config": {
           "imputer": "median",
-          "scaler": "robust",
+          "scaler": "standard",
           "categorical_encoder": "onehot",
-          "feature_engineering": "poly_top5",
+          "feature_engineering": "tree_importance_k75",
           "imbalance_strategy": "none",
           "threshold_tuning": false,
-          "model_family": "catboost",
-          "n_estimators": 250,
+          "model_family": "xgboost",
+          "n_estimators": 350,
           "max_depth": 6,
-          "learning_rate": 0.08,
-          "regularization": 3.0,
-          "subsample": 0.85,
+          "learning_rate": 0.05,
+          "regularization": 1.0,
+          "subsample": 1.0,
           "min_samples_leaf": 1
         },
         "token_usage": null
       },
-      "was_new_best": false,
-      "observed_outcome": "REFUTED/SUB-PEAK: Val Macro-F1=0.8587 (-0.0317 vs peak 0.8904), Overfit Gap=+0.1305.",
-      "hypothesis_confirmed": false,
+      "was_new_best": true,
+      "observed_outcome": "CONFIRMED: New peak reached. Val Macro-F1=0.7774 (+0.0163 vs prior best), Overfit Gap=+0.2226, Worst Class 'opel' F1=0.6125.",
+      "hypothesis_confirmed": true,
       "token_usage": null
     }
   ]
