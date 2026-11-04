@@ -10,6 +10,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import ExtraTreesClassifier, GradientBoostingClassifier, HistGradientBoostingClassifier, RandomForestClassifier
 from sklearn.feature_selection import SelectPercentile, f_classif
 from sklearn.impute import SimpleImputer
+from sklearn.model_selection import StratifiedKFold
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder, OrdinalEncoder, RobustScaler, StandardScaler
 from sklearn.utils.class_weight import compute_sample_weight
@@ -30,47 +31,223 @@ except Exception:
 
 
 class SmoothTargetEncoder(BaseEstimator, TransformerMixin):
-    """Leak-free smoothed target encoding for categorical features (supports binary & multiclass)."""
+    """Leak-free smoothed target encoding for categorical features (supports binary & multiclass with OOF cross-fitting)."""
 
-    def __init__(self, smoothing: float = 10.0) -> None:
+    def __init__(self, smoothing: float = 10.0, cv: Optional[int] = 5, random_state: int = 42) -> None:
         self.smoothing = smoothing
+        self.cv = cv
+        self.random_state = random_state
         self.global_prior_: float = 0.0
         self.mappings_: List[dict] = []
+        self.mappings_multiclass_: List[dict] = []
+        self.global_priors_: Dict[object, float] = {}
+        self.classes_: Optional[np.ndarray] = None
         self.n_features_in_: int = 0
 
-    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> "SmoothTargetEncoder":
+    def fit(
+        self,
+        X: np.ndarray,
+        y: Optional[np.ndarray] = None,
+        classes: Optional[np.ndarray] = None,
+    ) -> "SmoothTargetEncoder":
         X_arr = np.asarray(X, dtype=object)
         if X_arr.ndim == 1:
             X_arr = X_arr.reshape(-1, 1)
         self.n_features_in_ = X_arr.shape[1]
         if y is None:
+            self.classes_ = None
             self.global_prior_ = 0.5
             self.mappings_ = [{} for _ in range(self.n_features_in_)]
+            self.mappings_multiclass_ = []
+            self.global_priors_ = {}
             return self
 
-        y_num = np.asarray(y, dtype=float)
-        self.global_prior_ = float(np.mean(y_num))
-        self.mappings_ = []
-        for col_idx in range(self.n_features_in_):
-            col_vals = X_arr[:, col_idx]
-            df_tmp = pd.DataFrame({"val": col_vals, "y": y_num})
-            stats = df_tmp.groupby("val")["y"].agg(["count", "mean"])
-            counts = stats["count"]
-            means = stats["mean"]
-            smooth = (counts * means + self.smoothing * self.global_prior_) / (counts + self.smoothing)
-            self.mappings_.append(smooth.to_dict())
+        y_arr = np.asarray(y).reshape(-1)
+        if classes is not None:
+            self.classes_ = np.asarray(classes)
+        else:
+            self.classes_ = np.unique(y_arr)
+
+        if len(self.classes_) > 2:
+            # Multiclass decomposition: K smoothed binary target probabilities
+            self.global_priors_ = {
+                c: float(np.mean(y_arr == c)) if len(y_arr) > 0 and np.any(y_arr == c) else 0.0
+                for c in self.classes_
+            }
+            self.mappings_multiclass_ = []
+            for col_idx in range(self.n_features_in_):
+                col_vals = X_arr[:, col_idx]
+                col_dict = {}
+                for c in self.classes_:
+                    y_bin = (y_arr == c).astype(float)
+                    prior_c = self.global_priors_[c]
+                    if np.sum(y_bin) > 0:
+                        df_tmp = pd.DataFrame({"val": col_vals, "y": y_bin})
+                        stats = df_tmp.groupby("val")["y"].agg(["count", "mean"])
+                        counts = stats["count"]
+                        means = stats["mean"]
+                        smooth = (counts * means + self.smoothing * prior_c) / (counts + self.smoothing)
+                        col_dict[c] = smooth.to_dict()
+                    else:
+                        col_dict[c] = {}
+                self.mappings_multiclass_.append(col_dict)
+            self.mappings_ = []
+            self.global_prior_ = 0.0
+        else:
+            # Binary classification: probability of positive class
+            pos_label = self.classes_[-1] if len(self.classes_) > 0 else 1
+            y_bin = (y_arr == pos_label).astype(float)
+            self.global_prior_ = float(np.mean(y_bin)) if len(y_bin) > 0 else 0.5
+            self.mappings_ = []
+            self.mappings_multiclass_ = []
+            self.global_priors_ = {}
+            for col_idx in range(self.n_features_in_):
+                col_vals = X_arr[:, col_idx]
+                df_tmp = pd.DataFrame({"val": col_vals, "y": y_bin})
+                stats = df_tmp.groupby("val")["y"].agg(["count", "mean"])
+                counts = stats["count"]
+                means = stats["mean"]
+                smooth = (counts * means + self.smoothing * self.global_prior_) / (counts + self.smoothing)
+                self.mappings_.append(smooth.to_dict())
         return self
+
+    def fit_transform(
+        self,
+        X: np.ndarray,
+        y: Optional[np.ndarray] = None,
+        classes: Optional[np.ndarray] = None,
+        **fit_params,
+    ) -> np.ndarray:
+        """Fit target encoder and return out-of-fold cross-fitted transformations to eliminate in-sample target leakage."""
+        if y is None:
+            self.fit(X, None)
+            return self.transform(X)
+
+        y_arr = np.asarray(y).reshape(-1)
+        classes_arg = classes if classes is not None else fit_params.get("classes", None)
+        self.fit(X, y_arr, classes=classes_arg)
+
+        if self.cv is None:
+            return self.transform(X)
+
+        X_arr = np.asarray(X, dtype=object)
+        if X_arr.ndim == 1:
+            X_arr = X_arr.reshape(-1, 1)
+
+        n_samples = len(X_arr)
+        classes_unique, class_counts = np.unique(y_arr, return_counts=True)
+        max_class_count = int(np.max(class_counts)) if len(class_counts) > 0 else 0
+        effective_cv = min(self.cv, max_class_count, n_samples)
+        if effective_cv < 2:
+            # When effective_cv < 2 (e.g., singleton class or tiny dataset), StratifiedKFold cannot form >=2 folds.
+            # Strictly prevent in-sample target leakage by applying analytical Leave-One-Out (LOO) smoothing:
+            # for each sample i, sample i's own target is subtracted from the category statistics.
+            if n_samples <= 1:
+                # 0 or 1 sample: no out-of-sample data exists, return neutral global prior
+                if self.classes_ is not None and len(self.classes_) > 2:
+                    out = np.zeros((n_samples, self.n_features_in_ * len(self.classes_)), dtype=float)
+                    for col_idx in range(self.n_features_in_):
+                        for c_idx, c in enumerate(self.classes_):
+                            out[:, col_idx * len(self.classes_) + c_idx] = self.global_priors_[c]
+                    return out
+                return np.full((n_samples, self.n_features_in_), self.global_prior_, dtype=float)
+
+            # Analytical Leave-One-Out: subtract row i's target from category sum and count,
+            # AND compute leave-one-out global priors excluding sample i from the total dataset prior
+            if self.classes_ is not None and len(self.classes_) > 2:
+                out_cols = []
+                for col_idx in range(self.n_features_in_):
+                    col_vals = X_arr[:, col_idx]
+                    for c in self.classes_:
+                        y_bin = (y_arr == c).astype(float)
+                        total_c = float(np.sum(y_bin))
+                        loo_prior_c = (total_c - y_bin) / float(n_samples - 1)
+
+                        df_tmp = pd.DataFrame({"val": col_vals, "y": y_bin})
+                        cat_counts = df_tmp.groupby("val")["y"].transform("count").values
+                        cat_sums = df_tmp.groupby("val")["y"].transform("sum").values
+                        loo_counts = cat_counts - 1.0
+                        loo_sums = cat_sums - y_bin
+                        loo_encoded = np.where(
+                            loo_counts > 0,
+                            (loo_sums + self.smoothing * loo_prior_c) / (loo_counts + self.smoothing),
+                            loo_prior_c,
+                        )
+                        out_cols.append(loo_encoded.reshape(-1, 1))
+                return np.hstack(out_cols)
+            else:
+                pos_label = self.classes_[-1] if len(self.classes_) > 0 else 1
+                y_bin = (y_arr == pos_label).astype(float)
+                total_pos = float(np.sum(y_bin))
+                loo_global_prior = (total_pos - y_bin) / float(n_samples - 1)
+
+                out = np.zeros((n_samples, self.n_features_in_), dtype=float)
+                for col_idx in range(self.n_features_in_):
+                    col_vals = X_arr[:, col_idx]
+                    df_tmp = pd.DataFrame({"val": col_vals, "y": y_bin})
+                    cat_counts = df_tmp.groupby("val")["y"].transform("count").values
+                    cat_sums = df_tmp.groupby("val")["y"].transform("sum").values
+                    loo_counts = cat_counts - 1.0
+                    loo_sums = cat_sums - y_bin
+                    loo_encoded = np.where(
+                        loo_counts > 0,
+                        (loo_sums + self.smoothing * loo_global_prior) / (loo_counts + self.smoothing),
+                        loo_global_prior,
+                    )
+                    out[:, col_idx] = loo_encoded
+                return out
+
+        skf = StratifiedKFold(n_splits=effective_cv, shuffle=True, random_state=self.random_state)
+
+        # Allocate OOF array
+        n_out_cols = (
+            self.n_features_in_ * len(self.classes_)
+            if (self.classes_ is not None and len(self.classes_) > 2)
+            else self.n_features_in_
+        )
+        oof_encoded = np.zeros((n_samples, n_out_cols), dtype=float)
+
+        for tr_idx, val_idx in skf.split(X_arr, y_arr):
+            inner_enc = SmoothTargetEncoder(smoothing=self.smoothing, cv=None, random_state=self.random_state)
+            inner_enc.fit(X_arr[tr_idx], y_arr[tr_idx], classes=self.classes_)
+            oof_encoded[val_idx] = inner_enc.transform(X_arr[val_idx])
+
+        return oof_encoded
 
     def transform(self, X: np.ndarray) -> np.ndarray:
         X_arr = np.asarray(X, dtype=object)
         if X_arr.ndim == 1:
             X_arr = X_arr.reshape(-1, 1)
+
+        if self.classes_ is not None and len(self.classes_) > 2:
+            out_cols = []
+            for col_idx in range(self.n_features_in_):
+                col_vals = X_arr[:, col_idx]
+                for c in self.classes_:
+                    mapping = self.mappings_multiclass_[col_idx][c]
+                    prior = self.global_priors_[c]
+                    col_encoded = [float(mapping.get(v, prior)) for v in col_vals]
+                    out_cols.append(np.array(col_encoded, dtype=float).reshape(-1, 1))
+            return np.hstack(out_cols) if out_cols else np.empty((X_arr.shape[0], 0), dtype=float)
+
         out = np.full((X_arr.shape[0], self.n_features_in_), self.global_prior_, dtype=float)
         for col_idx in range(self.n_features_in_):
             mapping = self.mappings_[col_idx]
             col_vals = X_arr[:, col_idx]
             out[:, col_idx] = [float(mapping.get(v, self.global_prior_)) for v in col_vals]
         return out
+
+    def get_feature_names_out(self, input_features: Optional[List[str]] = None) -> np.ndarray:
+        """Return output feature names matching binary or multiclass column expansion."""
+        if input_features is None:
+            names = [f"x{i}" for i in range(self.n_features_in_)]
+        else:
+            names = list(input_features)
+
+        if self.classes_ is not None and len(self.classes_) > 2:
+            out_names = [f"{col}_class_{c}" for col in names for c in self.classes_]
+            return np.array(out_names, dtype=object)
+        return np.array(names, dtype=object)
 
 
 class FeatureEngineeringTransformer(BaseEstimator, TransformerMixin):
@@ -148,6 +325,46 @@ class FeatureEngineeringTransformer(BaseEstimator, TransformerMixin):
 
         return X_num
 
+    def get_feature_names_out(self, input_features: Optional[List[str]] = None) -> np.ndarray:
+        """Return output feature names with engineered interaction and pruned feature names."""
+        if input_features is None:
+            names = [f"x{i}" for i in range(self.n_features_in_)]
+        else:
+            names = list(input_features)
+
+        if self.n_features_in_ == 0 or self.strategy == "none":
+            return np.array(names, dtype=object)
+
+        if self.strategy == "poly_top5" and len(self.top_indices_) > 0:
+            extras = [f"{names[i]}_sq" for i in self.top_indices_]
+            for i in range(len(self.top_indices_)):
+                for j in range(i + 1, len(self.top_indices_)):
+                    idx_i, idx_j = self.top_indices_[i], self.top_indices_[j]
+                    extras.append(f"{names[idx_i]}x{names[idx_j]}")
+            return np.array(names + extras, dtype=object)
+
+        if self.strategy == "ratios_top5" and len(self.top_indices_) > 0:
+            extras = []
+            for i in range(len(self.top_indices_)):
+                for j in range(i + 1, len(self.top_indices_)):
+                    idx_i, idx_j = self.top_indices_[i], self.top_indices_[j]
+                    extras.append(f"ratio_{names[idx_i]}_{names[idx_j]}")
+                    extras.append(f"diff_{names[idx_i]}_{names[idx_j]}")
+            return np.array(names + extras, dtype=object)
+
+        if self.strategy == "mutual_info_k80" and self.selector_ is not None:
+            support = self.selector_.get_support()
+            if np.any(support):
+                return np.array([names[i] for i in range(len(names)) if support[i]], dtype=object)
+            return np.array(names, dtype=object)
+
+        if self.strategy == "tree_importance_k75" and self.keep_mask_ is not None:
+            if np.any(self.keep_mask_):
+                return np.array([names[i] for i in range(len(names)) if self.keep_mask_[i]], dtype=object)
+            return np.array(names, dtype=object)
+
+        return np.array(names, dtype=object)
+
 
 def build_preprocessor_and_fe(
     config: PipelineConfig,
@@ -182,7 +399,7 @@ def build_preprocessor_and_fe(
             ("encoder", OrdinalEncoder(handle_unknown="use_encoded_value", unknown_value=-1))
         )
     elif config.categorical_encoder == "target_smooth":
-        cat_steps.append(("encoder", SmoothTargetEncoder(smoothing=10.0)))
+        cat_steps.append(("encoder", SmoothTargetEncoder(smoothing=10.0, cv=5, random_state=random_state)))
 
     cat_pipeline = Pipeline(cat_steps)
 
