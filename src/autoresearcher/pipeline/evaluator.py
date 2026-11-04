@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import time
 from typing import Dict, List, Tuple
+import warnings
 import numpy as np
 from sklearn.metrics import balanced_accuracy_score, confusion_matrix, f1_score
 from sklearn.model_selection import StratifiedKFold
@@ -20,15 +21,51 @@ from autoresearcher.schemas import ConfusedPair, DiagnosticReport, PipelineConfi
 
 def _find_best_binary_threshold(y_true: np.ndarray, pos_probs: np.ndarray) -> float:
     """Find probability threshold in [0.20, 0.80] that maximizes Macro-F1 on training/inner fold."""
-    best_th = 0.50
-    best_score = -1.0
-    for th in np.linspace(0.22, 0.78, 15):
-        preds = (pos_probs >= th).astype(int)
-        score = float(f1_score(y_true, preds, average="macro", zero_division=0))
-        if score > best_score:
-            best_score = score
-            best_th = float(th)
-    return best_th
+    if len(pos_probs) == 0:
+        return 0.50
+
+    probs = np.asarray(pos_probs, dtype=float)
+    if np.any(np.isnan(probs)) or np.any(np.isinf(probs)):
+        warnings.warn(
+            "pos_probs contains NaN or Inf values; degenerate model predictions cannot be optimized. "
+            "Defaulting safely to neutral threshold 0.50 without optimization.",
+            UserWarning,
+            stacklevel=2,
+        )
+        return 0.50
+
+    if np.ptp(probs) < 1e-5:
+        return 0.50
+
+    y_arr = np.nan_to_num(np.asarray(y_true, dtype=int), nan=0)
+    y_true_mean = float(np.mean(y_arr)) if len(y_arr) > 0 else 0.50
+
+    thresholds = np.linspace(0.22, 0.78, 15)
+    scores = []
+    for th in thresholds:
+        preds = (probs >= th).astype(int)
+        score = float(f1_score(y_arr, preds, average="macro", zero_division=0))
+        scores.append(score)
+
+    max_score = max(scores)
+    # Collect candidate thresholds within 1e-5 of the true global maximum score
+    candidates = [
+        float(th) for th, sc in zip(thresholds, scores)
+        if sc >= max_score - 1e-5
+    ]
+
+    # Primary: threshold closest to 0.50
+    # Secondary: for equidistant pairs around 0.50 (e.g. 0.46 vs 0.54), select threshold
+    # that minimizes difference between predicted positive rate and training set prevalence
+    def tie_break_key(th: float) -> Tuple[float, float]:
+        dist_to_half = round(abs(th - 0.50), 6)
+        preds = (probs >= th).astype(int)
+        pred_rate = float(np.mean(preds))
+        bias = abs(pred_rate - y_true_mean)
+        return (dist_to_half, bias)
+
+    best_th = min(candidates, key=tie_break_key)
+    return float(best_th)
 
 
 def evaluate_pipeline_cv(
@@ -131,10 +168,19 @@ def evaluate_pipeline_cv(
     top_features: List[str] = []
     if feature_importances_accum and all(len(x) == len(feature_importances_accum[0]) for x in feature_importances_accum):
         mean_fi = np.mean(np.vstack(feature_importances_accum), axis=0)
+        n_fi = len(mean_fi)
         top_idx = np.argsort(mean_fi)[::-1][:5]
-        raw_cols = list(X_dev.columns)
+        try:
+            feat_names = list(preproc.get_feature_names_out())
+        except Exception:
+            feat_names = None
+
         for idx in top_idx:
-            col_label = raw_cols[idx] if idx < len(raw_cols) else f"engineered_feat_{idx}"
+            # Strictly verify that feature names length matches estimator dimensionality
+            if feat_names is not None and len(feat_names) == n_fi and idx < len(feat_names):
+                col_label = str(feat_names[idx])
+            else:
+                col_label = f"feature_{idx}"
             top_features.append(f"{col_label} ({mean_fi[idx]:.3f})")
 
     # Classify Primary Pathology for explicit diagnostic guidance
